@@ -3,7 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.nextbreakpoint</groupId>
 	<artifactId>Try</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -39,4 +42,10 @@
 			<version>1.9.5</version>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>maven-repository</id>
+			<url>file://${user.home}/maven-repository</url>
+		</repository>
+	</distributionManagement>
 </project>
