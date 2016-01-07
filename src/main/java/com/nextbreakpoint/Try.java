@@ -172,7 +172,11 @@ public abstract class Try<V, E extends Throwable> {
 
 		public <R> Try<R, E> map(Function<V, R> func) {
 			try {
-				return Try.ofNullable(expFunc, func.apply(value));
+				if (value != null) {
+					return Try.ofNullable(expFunc, func.apply(value));
+				} else {
+					return Try.empty(expFunc);
+				}
 			} catch (Exception e) {
 				return Try.failure(expFunc, expFunc.apply(e));
 			}

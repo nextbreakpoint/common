@@ -7,10 +7,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,7 +68,7 @@ public class TryTest {
 	}
 
 	@Test
-	public void ifPresentOrThrow_givenIsEmpty_shouldNotCallConsumer() throws Exception {
+	public void ifPresentOrThrow_givenTryIsEmpty_shouldNotCallConsumer() throws Exception {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try<Object, Exception> t = Try.empty(e -> e);
@@ -75,16 +77,34 @@ public class TryTest {
 	}
 
 	@Test
-	public void throwException_givenIsEmpty_shouldDoNothing() throws Exception {
+	public void throwException_givenTryIsEmpty_shouldDoNothing() throws Exception {
 		Try<Object, Exception> t = Try.empty(e -> e);
 		t.throwException();
 	}
 
 	@Test
-	public void value_givenIsEmpty_shouldReturnEmptyOptional() throws Exception {
+	public void value_givenTryIsEmpty_shouldReturnEmptyOptional() throws Exception {
 		Try<Object, Exception> t = Try.empty(e -> e);
 		Optional<Object> value = t.value();
 		assertFalse(value.isPresent());
+	}
+
+	@Test
+	public void map_givenTryIsEmpty_shouldNotCallFunction() throws Exception {
+		@SuppressWarnings("unchecked")
+		Function<Object, Object> function = mock(Function.class);
+		Try<Object, Exception> t = Try.empty(e -> e);
+		t.map(function);
+		verify(function, times(0)).apply(any());
+	}
+
+	@Test
+	public void flatMap_givenTryIsEmpty_shouldNotCallFunction() throws Exception {
+		@SuppressWarnings("unchecked")
+		Function<Object, Try<Object, Exception>> function = mock(Function.class);
+		Try<Object, Exception> t = Try.empty(e -> e);
+		t.flatMap(function);
+		verify(function, times(0)).apply(any());
 	}
 
 	@Test
@@ -149,6 +169,24 @@ public class TryTest {
 	}
 
 	@Test
+	public void map_givenTryIsSuccessWithNullValue_shouldNotCallFunction() throws Exception {
+		@SuppressWarnings("unchecked")
+		Function<Object, Object> function = mock(Function.class);
+		Try<Object, Exception> t = Try.success(e -> e, null);
+		t.map(function);
+		verify(function, times(0)).apply(any());
+	}
+
+	@Test
+	public void flatMap_givenTryIsSuccessWithNullValue_shouldNotCallFunction() throws Exception {
+		@SuppressWarnings("unchecked")
+		Function<Object, Try<Object, Exception>> function = mock(Function.class);
+		Try<Object, Exception> t = Try.success(e -> e, null);
+		t.flatMap(function);
+		verify(function, times(0)).apply(any());
+	}
+
+	@Test
 	public void get_givenTryIsSuccessWithValue_shouldReturnSameValue() {
 		Try<Object, Exception> t = Try.success(e -> e, "X");
 		assertEquals("X", t.get());
@@ -204,6 +242,44 @@ public class TryTest {
 	}
 
 	@Test
+	public void map_givenTryIsSuccessWithValue_shouldCallFunction() throws Exception {
+		@SuppressWarnings("unchecked")
+		Function<Object, Object> function = mock(Function.class);
+		Try<Object, Exception> t = Try.success(e -> e, "X");
+		t.map(function);
+		verify(function, times(1)).apply("X");
+	}
+
+	@Test
+	public void flatMap_givenTryIsSuccessWithValue_shouldCallFunction() throws Exception {
+		@SuppressWarnings("unchecked")
+		Function<Object, Try<Object, Exception>> function = mock(Function.class);
+		Try<Object, Exception> t = Try.success(e -> e, "X");
+		t.flatMap(function);
+		verify(function, times(1)).apply("X");
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void map_givenTryIsSuccessWithValueAndFunctionThrowsRuntimeException_shouldReturnFailure() throws Exception {
+		Function<Object, Object> function = mock(Function.class);
+		when(function.apply(any())).thenThrow(RuntimeException.class);
+		Try<Object, Exception> t = Try.success(e -> e, "X");
+		Try<Object, Exception> q = t.map(function);
+		assertTrue(q.isFailure());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void flatMap_givenTryIsSuccessWithValueAndFunctionThrowsRuntimeException_shouldReturnFailure() throws Exception {
+		Function<Object, Try<Object, Exception>> function = mock(Function.class);
+		when(function.apply(any())).thenThrow(RuntimeException.class);
+		Try<Object, Exception> t = Try.success(e -> e, "X");
+		Try<Object, Exception> q = t.flatMap(function);
+		assertTrue(q.isFailure());
+	}
+	
+	@Test
 	public void failure_shouldReturnFailure() {
 		Try<Object, Exception> t = Try.failure(e -> e, new Exception());
 		assertFalse(t.isSuccess());
@@ -220,7 +296,7 @@ public class TryTest {
 	public void get_givenTryIsFailure_shouldThrowException() {
 		exception.expect(NoSuchElementException.class);
 		Try<Object, Exception> t = Try.failure(e -> e, new Exception());
-		assertEquals("X", t.get());
+		t.get();
 	}
 
 	@Test
@@ -233,9 +309,9 @@ public class TryTest {
 	public void getOrThrow_givenTryIsFailure_shouldThrowException() throws Exception {
 		exception.expect(IllegalAccessException.class);
 		Try<Object, Exception> t = Try.failure(e -> e, new IllegalAccessException());
-		assertEquals("X", t.getOrThrow());
+		t.getOrThrow();
 	}
-
+ 
 	@Test
 	public void ifPresent_givenTryIsFailure_shouldNotHaveValue() throws Exception {
 		Try<Object, Exception> t = Try.failure(e -> e, new Exception());
@@ -272,6 +348,24 @@ public class TryTest {
 		Try<Object, Exception> t = Try.failure(e -> e, new Exception());
 		Optional<Object> value = t.value();
 		assertFalse(value.isPresent());
+	}
+
+	@Test
+	public void map_givenTryIsFailure_shouldCallFunction() throws Exception {
+		@SuppressWarnings("unchecked")
+		Function<Object, Object> function = mock(Function.class);
+		Try<Object, Exception> t = Try.failure(e -> e, new Exception());
+		t.map(function);
+		verify(function, times(0)).apply(any());
+	}
+
+	@Test
+	public void flatMap_givenTryIsFailure_shouldCallFunction() throws Exception {
+		@SuppressWarnings("unchecked")
+		Function<Object, Try<Object, Exception>> function = mock(Function.class);
+		Try<Object, Exception> t = Try.failure(e -> e, new Exception());
+		t.flatMap(function);
+		verify(function, times(0)).apply(any());
 	}
 
 	@Test
@@ -336,5 +430,11 @@ public class TryTest {
 		Object value = new Object();
 		Object result = Try.of(e -> e, () -> { throw new Exception(); }).orElseTry(() -> value).get();
 		assertEquals(value, result);
+	}
+
+	@Test
+	public void orElseTry_givenElseBlockThrowsException_shouldReturnFailure() {
+		Try<Object, Exception> q = Try.of(e -> e, () -> { throw new Exception(); }).orElseTry(() -> { throw new Exception(); });
+		assertTrue(q.isFailure());
 	}
 }
