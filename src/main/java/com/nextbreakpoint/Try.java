@@ -23,9 +23,9 @@ public abstract class Try<V, E extends Throwable> {
 
 	public abstract Boolean isFailure();
 
-	public abstract void throwException() throws E;
+	public void throwException() throws E {}
 	
-	public abstract void ifPresent(Consumer<V> c);
+	public void ifPresent(Consumer<V> c) {}
 
 	public abstract void ifPresentOrThrow(Consumer<V> c) throws E;
 
@@ -112,6 +112,7 @@ public abstract class Try<V, E extends Throwable> {
 
 		public Failure(Function<Exception, E> expFunc, E e) {
 		    super(expFunc);
+		    Objects.requireNonNull(e);
 			this.exception = e;
 		}
 
@@ -136,9 +137,6 @@ public abstract class Try<V, E extends Throwable> {
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
 			return Try.failure(expFunc, exception);
-		}
-
-		public void ifPresent(Consumer<V> c) {
 		}
 
 		public void ifPresentOrThrow(Consumer<V> c) throws E {
@@ -172,10 +170,6 @@ public abstract class Try<V, E extends Throwable> {
 			return false;
 		}
 
-		@Override
-		public void throwException() {
-		}
-		
 		public <R> Try<R, E> map(Function<V, R> func) {
 			try {
 				return Try.ofNullable(expFunc, func.apply(value));
