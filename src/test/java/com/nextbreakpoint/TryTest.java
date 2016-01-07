@@ -23,95 +23,9 @@ public class TryTest {
 	public ExpectedException exception = ExpectedException.none();
 	
 	@Test
-	public void empty_shouldReturnSuccess() {
-		Try<Object, Exception> t = Try.empty(e -> e);
-		assertFalse(t.isFailure());
-		assertTrue(t.isSuccess());
-	}
-	
-	@Test
-	public void empty_shouldReturnSuccessWithoutValue() {
-		Try<Object, Exception> t = Try.empty(e -> e);
-		assertFalse(t.isPresent());
-	}
-	
-	@Test
-	public void get_givenTryIsEmpty_shouldThrowException() {
-		exception.expect(NoSuchElementException.class);
-		Try.empty(e -> e).get();
-	}
-	
-	@Test
-	public void getOrElse_givenTryIsEmpty_shouldReturnElseValue() {
-		assertEquals("X", Try.empty(e -> e).getOrElse("X"));
-	}
-	
-	@Test
-	public void getOrThrow_givenTryIsEmpty_shouldThrowException() throws Exception {
-		exception.expect(NoSuchElementException.class);
-		Try.empty(e -> e).getOrThrow();
-	}
-
-	@Test
-	public void ifPresent_givenTryIsEmpty_shouldNotHaveValue() throws Exception {
-		Try<Object, Exception> t = Try.empty(e -> e);
-		assertFalse(t.isPresent());
-	}
-
-	@Test
-	public void ifPresentConsumer_givenTryIsEmpty_shouldNotCallConsumer() throws Exception {
-		@SuppressWarnings("unchecked")
-		Consumer<Object> consumer = mock(Consumer.class);
-		Try<Object, Exception> t = Try.empty(e -> e);
-		t.ifPresent(consumer);
-		verify(consumer, times(0)).accept(any());
-	}
-
-	@Test
-	public void ifPresentOrThrow_givenTryIsEmpty_shouldNotCallConsumer() throws Exception {
-		@SuppressWarnings("unchecked")
-		Consumer<Object> consumer = mock(Consumer.class);
-		Try<Object, Exception> t = Try.empty(e -> e);
-		t.ifPresentOrThrow(consumer);
-		verify(consumer, times(0)).accept(any());
-	}
-
-	@Test
-	public void throwException_givenTryIsEmpty_shouldDoNothing() throws Exception {
-		Try<Object, Exception> t = Try.empty(e -> e);
-		t.throwException();
-	}
-
-	@Test
-	public void value_givenTryIsEmpty_shouldReturnEmptyOptional() throws Exception {
-		Try<Object, Exception> t = Try.empty(e -> e);
-		Optional<Object> value = t.value();
-		assertFalse(value.isPresent());
-	}
-
-	@Test
-	public void map_givenTryIsEmpty_shouldNotCallFunction() throws Exception {
-		@SuppressWarnings("unchecked")
-		Function<Object, Object> function = mock(Function.class);
-		Try<Object, Exception> t = Try.empty(e -> e);
-		t.map(function);
-		verify(function, times(0)).apply(any());
-	}
-
-	@Test
-	public void flatMap_givenTryIsEmpty_shouldNotCallFunction() throws Exception {
-		@SuppressWarnings("unchecked")
-		Function<Object, Try<Object, Exception>> function = mock(Function.class);
-		Try<Object, Exception> t = Try.empty(e -> e);
-		t.flatMap(function);
-		verify(function, times(0)).apply(any());
-	}
-
-	@Test
 	public void success_shouldReturnSuccess() {
 		Try<Object, Exception> t = Try.success(e -> e, "X");
 		assertFalse(t.isFailure());
-		assertTrue(t.isSuccess());
 	}
 	
 	@Test
@@ -282,7 +196,6 @@ public class TryTest {
 	@Test
 	public void failure_shouldReturnFailure() {
 		Try<Object, Exception> t = Try.failure(e -> e, new Exception());
-		assertFalse(t.isSuccess());
 		assertTrue(t.isFailure());
 	}
 
@@ -369,51 +282,27 @@ public class TryTest {
 	}
 
 	@Test
-	public void ofNullable_givenNullValue_shouldReturnSuccess() {
-		Try<Object, Exception> t = Try.ofNullable(e -> e, null);
-		assertTrue(t.isSuccess());
-	}
-
-	@Test
-	public void of_givenNullValue_shouldReturnThrowException() {
+	public void block_givenNullBlock_shouldThrowException() {
 		exception.expect(Exception.class);
-		Try.of(e -> e, null);
+		Try.block(e -> e, null);
 	}
 
 	@Test
-	public void ofNullable_givenNotNullValue_shouldReturnSuccess() {
-		Try<Object, Exception> t = Try.ofNullable(e -> e, "X");
-		assertTrue(t.isSuccess());
+	public void block_givenBlockReturnsObject_shouldReturnSuccess() {
+		Try<Object, Exception> t = Try.block(e -> e, () -> new Object());
+		assertFalse(t.isFailure());
 	}
 
 	@Test
-	public void of_givenNotNullValue_shouldReturnSuccess() {
-		Try<Object, Exception> t = Try.of(e -> e, "X");
-		assertTrue(t.isSuccess());
-	}
-
-	@Test
-	public void of_givenNullBlock_shouldThrowException() {
-		exception.expect(Exception.class);
-		Try.of(e -> e, null);
-	}
-
-	@Test
-	public void of_givenBlockReturnsObject_shouldReturnSuccess() {
-		Try<Object, Exception> t = Try.of(e -> e, () -> new Object());
-		assertTrue(t.isSuccess());
-	}
-
-	@Test
-	public void of_givenBlockThrowsException_shouldReturnFailure() {
-		Try<Object, Exception> t = Try.of(e -> e, () -> { throw new Exception(); });
+	public void block_givenBlockThrowsException_shouldReturnFailure() {
+		Try<Object, Exception> t = Try.block(e -> e, () -> { throw new Exception(); });
 		assertTrue(t.isFailure());
 	}
 
 	@Test
-	public void of_givenBlockReturnsObject_shouldReturnSameObject() {
+	public void block_givenBlockReturnsObject_shouldReturnSameObject() {
 		Object value = new Object();
-		Try<Object, Exception> t = Try.of(e -> e, () -> value);
+		Try<Object, Exception> t = Try.block(e -> e, () -> value);
 		assertEquals(value, t.get());
 	}
 
@@ -421,20 +310,20 @@ public class TryTest {
 	public void orElseTry_givenBlockReturnsValue_shouldNotCallElseBlock() {
 		Object value = new Object();
 		Object elseValue = new Object();
-		Object result = Try.of(e -> e, () -> value).orElseTry(() -> elseValue).get();
+		Object result = Try.block(e -> e, () -> value).orElseTry(() -> elseValue).get();
 		assertEquals(value, result);
 	}
 
 	@Test
 	public void orElseTry_givenBlockThrowsException_shouldCallElseBlockAndReturnValue() {
 		Object value = new Object();
-		Object result = Try.of(e -> e, () -> { throw new Exception(); }).orElseTry(() -> value).get();
+		Object result = Try.block(e -> e, () -> { throw new Exception(); }).orElseTry(() -> value).get();
 		assertEquals(value, result);
 	}
 
 	@Test
 	public void orElseTry_givenElseBlockThrowsException_shouldReturnFailure() {
-		Try<Object, Exception> q = Try.of(e -> e, () -> { throw new Exception(); }).orElseTry(() -> { throw new Exception(); });
+		Try<Object, Exception> q = Try.block(e -> e, () -> { throw new Exception(); }).orElseTry(() -> { throw new Exception(); });
 		assertTrue(q.isFailure());
 	}
 }

@@ -19,12 +19,12 @@ public abstract class Try<V, E extends Throwable> {
 	    this.expFunc = expFunc;
 	}
 
-	public abstract Boolean isSuccess();
-
 	public abstract Boolean isFailure();
 
 	public void throwException() throws E {}
 	
+	public abstract boolean isPresent();
+
 	public void ifPresent(Consumer<V> c) {}
 
 	public abstract void ifPresentOrThrow(Consumer<V> c) throws E;
@@ -33,7 +33,13 @@ public abstract class Try<V, E extends Throwable> {
 
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
-	public abstract boolean isPresent();
+    public Optional<V> value() {
+        if (isPresent()) {
+            return Optional.of(get());
+        } else {
+            return Optional.empty();
+        }
+    }
 
 	public abstract V get();
 
@@ -45,12 +51,11 @@ public abstract class Try<V, E extends Throwable> {
         }
     }
 
-    public Optional<V> value() {
-        if (isPresent()) {
-            return Optional.of(get());
-        } else {
-            return Optional.empty();
+    public V getOrThrow() throws E {
+        if (isFailure()) {
+            throwException();
         }
+        return get();
     }
 
     public Try<V, E> orElseTry(Block<V> block) {
@@ -65,27 +70,7 @@ public abstract class Try<V, E extends Throwable> {
         }
     }
 
-    public V getOrThrow() throws E {
-        if (isFailure()) {
-            throwException();
-        }
-        return get();
-    }
-
-	public static <V, E extends Throwable> Try<V, E> empty(Function<Exception, E> expFunc) {
-		return Try.success(expFunc, null);
-	}
-
-	public static <V, E extends Throwable> Try<V, E> ofNullable(Function<Exception, E> expFunc, V value) {
-		return Try.success(expFunc, value);
-	}
-
-    public static <V, E extends Throwable> Try<V, E> of(Function<Exception, E> expFunc, V value) {
-        Objects.requireNonNull(value);
-        return Try.success(expFunc, value);
-    }
-
-    public static <V, E extends Throwable> Try<V, E> of(Function<Exception, E> expFunc, Block<V> block) {
+    public static <V, E extends Throwable> Try<V, E> block(Function<Exception, E> expFunc, Block<V> block) {
         Objects.requireNonNull(block);
         try {
         	return Try.success(expFunc, block.run());
@@ -114,11 +99,6 @@ public abstract class Try<V, E extends Throwable> {
 		    super(expFunc);
 		    Objects.requireNonNull(e);
 			this.exception = e;
-		}
-
-		@Override
-		public Boolean isSuccess() {
-			return false;
 		}
 
 		@Override
@@ -161,11 +141,6 @@ public abstract class Try<V, E extends Throwable> {
 		}
 
 		@Override
-		public Boolean isSuccess() {
-			return true;
-		}
-
-		@Override
 		public Boolean isFailure() {
 			return false;
 		}
@@ -173,9 +148,9 @@ public abstract class Try<V, E extends Throwable> {
 		public <R> Try<R, E> map(Function<V, R> func) {
 			try {
 				if (value != null) {
-					return Try.ofNullable(expFunc, func.apply(value));
+					return Try.success(expFunc, func.apply(value));
 				} else {
-					return Try.empty(expFunc);
+					return Try.success(expFunc, null);
 				}
 			} catch (Exception e) {
 				return Try.failure(expFunc, expFunc.apply(e));
@@ -187,7 +162,7 @@ public abstract class Try<V, E extends Throwable> {
 				if (value != null) {
 					return func.apply(value);
 				} else {
-					return Try.empty(expFunc);
+					return Try.success(expFunc, null);
 				}
 			} catch (Exception e) {
 				return Try.failure(expFunc, expFunc.apply(e));
