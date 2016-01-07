@@ -85,6 +85,15 @@ public abstract class Try<V, E extends Throwable> {
         return Try.success(expFunc, value);
     }
 
+    public static <V, E extends Throwable> Try<V, E> of(Function<Exception, E> expFunc, Block<V> block) {
+        Objects.requireNonNull(block);
+        try {
+        	return Try.success(expFunc, block.run());
+        } catch (Exception e) {
+        	return Try.failure(expFunc, expFunc.apply(e));
+        }
+    }
+
     public static <V, E extends Throwable> Try<V, E> failure(Function<Exception, E> expFunc, E e) {
 		return new Failure<>(expFunc, e);
 	}
