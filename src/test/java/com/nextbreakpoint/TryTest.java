@@ -46,7 +46,7 @@ public class TryTest {
 	}
 
 	@Test
-	public void ifPresent_givenTryIsSuccessWithNullValue_shouldNotHaveValue() throws Exception {
+	public void isPresent_givenTryIsSuccessWithNullValue_shouldNotHaveValue() throws Exception {
 		Try<Object, Exception> t = Try.success(e -> e, null);
 		assertFalse(t.isPresent());
 	}
@@ -119,7 +119,7 @@ public class TryTest {
 	}
 
 	@Test
-	public void ifPresent_givenTryIsSuccessWithValue_shouldHaveValue() throws Exception {
+	public void isPresent_givenTryIsSuccessWithValue_shouldHaveValue() throws Exception {
 		Try<Object, Exception> t = Try.success(e -> e, "X");
 		assertTrue(t.isPresent());
 	}
@@ -226,7 +226,7 @@ public class TryTest {
 	}
  
 	@Test
-	public void ifPresent_givenTryIsFailure_shouldNotHaveValue() throws Exception {
+	public void isPresent_givenTryIsFailure_shouldNotHaveValue() throws Exception {
 		Try<Object, Exception> t = Try.failure(e -> e, new Exception());
 		assertFalse(t.isPresent());
 	}
@@ -282,48 +282,44 @@ public class TryTest {
 	}
 
 	@Test
-	public void block_givenNullBlock_shouldThrowException() {
+	public void of_givenNullSupplier_shouldThrowException() {
 		exception.expect(Exception.class);
-		Try.block(e -> e, null);
+		Try.of(e -> e, null);
 	}
 
 	@Test
-	public void block_givenBlockReturnsObject_shouldReturnSuccess() {
-		Try<Object, Exception> t = Try.block(e -> e, () -> new Object());
+	public void of_givenSupplierReturnsObject_shouldReturnSuccess() {
+		Try<Object, Exception> t = Try.of(e -> e, () -> new Object());
 		assertFalse(t.isFailure());
 	}
 
 	@Test
-	public void block_givenBlockThrowsException_shouldReturnFailure() {
-		Try<Object, Exception> t = Try.block(e -> e, () -> { throw new Exception(); });
+	public void of_givenSupplierThrowsException_shouldReturnFailure() {
+		Try<Object, Exception> t = Try.of(e -> e, () -> { throw new Exception(); });
 		assertTrue(t.isFailure());
 	}
 
 	@Test
-	public void block_givenBlockReturnsObject_shouldReturnSameObject() {
-		Object value = new Object();
-		Try<Object, Exception> t = Try.block(e -> e, () -> value);
-		assertEquals(value, t.get());
+	public void of_givenSupplierReturnsObject_shouldReturnSameObject() {
+		Try<Object, Exception> t = Try.of(e -> e, () -> "X");
+		assertEquals("X", t.get());
 	}
 
 	@Test
-	public void orElseTry_givenBlockReturnsValue_shouldNotCallElseBlock() {
-		Object value = new Object();
-		Object elseValue = new Object();
-		Object result = Try.block(e -> e, () -> value).orElseTry(() -> elseValue).get();
-		assertEquals(value, result);
+	public void or_givenSupplierReturnsValue_shouldNotCallElseSupplier() {
+		Object result = Try.of(e -> e, () -> "X").or(() -> "Y").get();
+		assertEquals("X", result);
 	}
 
 	@Test
-	public void orElseTry_givenBlockThrowsException_shouldCallElseBlockAndReturnValue() {
-		Object value = new Object();
-		Object result = Try.block(e -> e, () -> { throw new Exception(); }).orElseTry(() -> value).get();
-		assertEquals(value, result);
+	public void or_givenSupplierThrowsException_shouldCallElseSupplierAndReturnValue() {
+		Object result = Try.of(e -> e, () -> { throw new Exception(); }).or(() -> "Y").get();
+		assertEquals("Y", result);
 	}
 
 	@Test
-	public void orElseTry_givenElseBlockThrowsException_shouldReturnFailure() {
-		Try<Object, Exception> q = Try.block(e -> e, () -> { throw new Exception(); }).orElseTry(() -> { throw new Exception(); });
+	public void or_givenElseSupplierThrowsException_shouldReturnFailure() {
+		Try<Object, Exception> q = Try.of(e -> e, () -> { throw new Exception(); }).or(() -> { throw new Exception(); });
 		assertTrue(q.isFailure());
 	}
 }

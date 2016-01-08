@@ -13,19 +13,20 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Try<V, E extends Throwable> {
-    protected final Function<Exception, E> expFunc;  
+    protected final Function<Exception, E> mapper;  
     
-	private Try(Function<Exception, E> expFunc) {
-	    this.expFunc = expFunc;
+	private Try(Function<Exception, E> mapper) {
+        Objects.requireNonNull(mapper);
+	    this.mapper = mapper;
 	}
-
-	public abstract Boolean isFailure();
 
 	public void throwException() throws E {}
 	
+	public abstract boolean isFailure();
+
 	public abstract boolean isPresent();
 
-	public void ifPresent(Consumer<V> c) {}
+	public abstract void ifPresent(Consumer<V> c);
 
 	public abstract void ifPresentOrThrow(Consumer<V> c) throws E;
 
@@ -33,76 +34,44 @@ public abstract class Try<V, E extends Throwable> {
 
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
-    public Optional<V> value() {
-        if (isPresent()) {
-            return Optional.of(get());
-        } else {
-            return Optional.empty();
-        }
-    }
+    public abstract Try<V, E> or(TrySupplier<V> block);
+
+    public abstract Optional<V> value();
 
 	public abstract V get();
 
-    public V getOrElse(V value) {
-        if (isPresent()) {
-            return get();
-        } else {
-            return value;
-        }
-    }
+	public abstract V getOrElse(V value);
+	
+	public abstract V getOrThrow() throws E;
 
-    public V getOrThrow() throws E {
-        if (isFailure()) {
-            throwException();
-        }
-        return get();
-    }
-
-    public Try<V, E> orElseTry(Block<V> block) {
-        if (!isPresent()) {
-            try {
-                return Try.success(expFunc, block.run());   
-            } catch (Exception e) {
-                return Try.failure(expFunc, expFunc.apply(e));
-            }
-        } else {
-            return this;
-        }
-    }
-
-    public static <V, E extends Throwable> Try<V, E> block(Function<Exception, E> expFunc, Block<V> block) {
-        Objects.requireNonNull(block);
+    public static <V, E extends Throwable> Try<V, E> of(Function<Exception, E> mapper, TrySupplier<V> supplier) {
+        Objects.requireNonNull(supplier);
         try {
-        	return Try.success(expFunc, block.run());
+        	return Try.success(mapper, supplier.supply());
         } catch (Exception e) {
-        	return Try.failure(expFunc, expFunc.apply(e));
+        	return Try.failure(mapper, mapper.apply(e));
         }
     }
 
-    public static <V, E extends Throwable> Try<V, E> failure(Function<Exception, E> expFunc, E e) {
-		return new Failure<>(expFunc, e);
+    public static <V, E extends Throwable> Try<V, E> failure(Function<Exception, E> mapper, E e) {
+		return new Failure<>(mapper, e);
 	}
 
-    public static <V, E extends Throwable> Try<V, E> success(Function<Exception, E> expFunc, V value) {
-		return new Success<>(expFunc, value);
+    public static <V, E extends Throwable> Try<V, E> success(Function<Exception, E> mapper, V value) {
+		return new Success<>(mapper, value);
 	}
 
-	@FunctionalInterface
-    public interface Block<R> {
-        public R run() throws Exception;
-    }
-    
-    private static class Failure<V, E extends Throwable> extends Try<V, E> {
+	private static class Failure<V, E extends Throwable> extends Try<V, E> {
 		private E exception;
 
-		public Failure(Function<Exception, E> expFunc, E e) {
-		    super(expFunc);
+		public Failure(Function<Exception, E> mapper, E e) {
+		    super(mapper);
 		    Objects.requireNonNull(e);
 			this.exception = e;
 		}
 
 		@Override
-		public Boolean isFailure() {
+		public boolean isFailure() {
 			return true;
 		}
 
@@ -112,80 +81,110 @@ public abstract class Try<V, E extends Throwable> {
 		}
 
 		public <R> Try<R, E> map(Function<V, R> func) {
-			return Try.failure(expFunc, exception);
+			return Try.failure(mapper, exception);
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
-			return Try.failure(expFunc, exception);
+			return Try.failure(mapper, exception);
+		}
+		
+	    public Try<V, E> or(TrySupplier<V> supplier) {
+            try {
+                return Try.success(mapper, supplier.supply());   
+            } catch (Exception e) {
+                return Try.failure(mapper, mapper.apply(e));
+            }
+	    }
+
+		public boolean isPresent() {
+			return false;
+		}
+
+		public void ifPresent(Consumer<V> c) {
 		}
 
 		public void ifPresentOrThrow(Consumer<V> c) throws E {
 			throw exception;
 		}
-		
-		public boolean isPresent() {
-			return false;
-		}
 
 		public V get() {
-			throw new NoSuchElementException();
+			throw new NoSuchElementException("Failure doesn't have any value");
+		}
+
+		public V getOrElse(V value) {
+			return value;
+		}
+
+		public V getOrThrow() throws E {
+			throw exception;
+	    }
+		
+		@Override
+		public Optional<V> value() {
+			return Optional.empty();
 		}
 	}
 
 	private static class Success<V, E extends Throwable> extends Try<V, E> {
-		private V value;
+		private final Optional<V> optional;
 
-		public Success(Function<Exception, E> expFunc, V value) {
-            super(expFunc);
-			this.value = value;
+		public Success(Function<Exception, E> mapper, V value) {
+            super(mapper);
+			this.optional = Optional.ofNullable(value);
 		}
 
 		@Override
-		public Boolean isFailure() {
+		public boolean isFailure() {
 			return false;
 		}
 
 		public <R> Try<R, E> map(Function<V, R> func) {
 			try {
-				if (value != null) {
-					return Try.success(expFunc, func.apply(value));
-				} else {
-					return Try.success(expFunc, null);
-				}
+				return optional.map(value -> Try.success(mapper, func.apply(value))).orElseGet(() -> Try.success(mapper, null));
 			} catch (Exception e) {
-				return Try.failure(expFunc, expFunc.apply(e));
+				return Try.failure(mapper, mapper.apply(e));
 			}
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
 			try {
-				if (value != null) {
-					return func.apply(value);
-				} else {
-					return Try.success(expFunc, null);
-				}
+				return optional.map(value -> func.apply(value)).orElseGet(() -> Try.success(mapper, null));
 			} catch (Exception e) {
-				return Try.failure(expFunc, expFunc.apply(e));
+				return Try.failure(mapper, mapper.apply(e));
 			}
+		}
+		
+	    public Try<V, E> or(TrySupplier<V> supplier) {
+            return this;
+	    }
+
+		public boolean isPresent() {
+			return optional.isPresent();
 		}
 
 		public void ifPresent(Consumer<V> c) {
-			if (value != null) c.accept(value);
+			optional.ifPresent(c);
 		}
 
 		public void ifPresentOrThrow(Consumer<V> c) {
-			if (value != null) c.accept(value);
-		}
-
-		public boolean isPresent() {
-			return value != null;
+			optional.ifPresent(c);
 		}
 
 		public V get() {
-			if (value == null) {
-				throw new NoSuchElementException();
-			}
-			return value;
+			return optional.get();
+		}
+
+		public V getOrElse(V value) {
+			return optional.orElse(value);
+		}
+
+		public V getOrThrow() throws E {
+	        return get();
+	    }
+		
+		@Override
+		public Optional<V> value() {
+			return optional;
 		}
 	}
 }
