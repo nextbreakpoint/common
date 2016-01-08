@@ -61,6 +61,27 @@ public abstract class Try<V, E extends Throwable> {
 		return new Success<>(mapper, value);
 	}
 
+    public static <V> Try<V, Exception> of(TrySupplier<V> supplier) {
+        Objects.requireNonNull(supplier);
+        try {
+        	return Try.success(defaultMapper(), supplier.supply());
+        } catch (Exception e) {
+        	return Try.failure(defaultMapper(), e);
+        }
+    }
+
+    public static <V> Try<V, Exception> failure(Exception e) {
+		return new Failure<>(defaultMapper(), e);
+	}
+
+    public static <V> Try<V, Exception> success(V value) {
+		return new Success<>(defaultMapper(), value);
+	}
+
+	private static Function<Exception, Exception> defaultMapper() {
+		return x -> x;
+	}
+
 	private static class Failure<V, E extends Throwable> extends Try<V, E> {
 		private E exception;
 
