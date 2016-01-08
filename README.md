@@ -2,7 +2,7 @@
 
 Try is an implementation of a monad for dealing with exceptions in Java language.
 
-Try helps handling of checked exceptions in functional code.
+Try helps to handle checked or unchecked exceptions in functional code.
 
 ## Example
 
