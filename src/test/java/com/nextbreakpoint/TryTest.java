@@ -349,4 +349,11 @@ public class TryTest {
 		Try<Object, IOException> t = Try.of(mapper, () -> { throw x; });
 		t.throwException();
 	}
+
+	@Test
+	public void of_givenMapperReturnsIOExceptionAndSupplierReturnsObject_shouldReturnSuccess() {
+		Function<Exception, IOException> mapper = e -> (e instanceof IOException) ? (IOException)e : new IOException(e);
+		Try<Object, IOException> t = Try.of(mapper, () -> new Object());
+		assertFalse(t.isFailure());
+	}
 }
