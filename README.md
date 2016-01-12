@@ -1,6 +1,6 @@
 # Try
 
-Try is a functional API for dealing with exceptions in Java language.
+Try implements a functional API for dealing with exceptions in Java language.
 
 Try helps to handle checked or unchecked exceptions in Java 8.
 
