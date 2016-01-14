@@ -45,6 +45,8 @@ public abstract class Try<V, E extends Throwable> {
 	
 	public abstract V getOrThrow() throws E;
 
+	public abstract V getOrThrow(V value) throws E;
+
     public static <V, E extends Throwable> Try<V, E> of(Function<Throwable, E> mapper, Callable<V> callable) {
         Objects.requireNonNull(callable);
         try {
@@ -141,6 +143,10 @@ public abstract class Try<V, E extends Throwable> {
 			throw exception;
 	    }
 		
+		public V getOrThrow(V value) throws E {
+			throw exception;
+	    }
+		
 		@Override
 		public Optional<V> value() {
 			return Optional.empty();
@@ -202,6 +208,10 @@ public abstract class Try<V, E extends Throwable> {
 
 		public V getOrThrow() throws E {
 	        return get();
+	    }
+
+		public V getOrThrow(V value) throws E {
+	        return getOrElse(value);
 	    }
 		
 		@Override

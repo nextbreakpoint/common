@@ -121,6 +121,18 @@ public class TryTest {
 	}
 
 	@Test
+	public void getOrThrowWithValue_givenTryIsSuccessWithValue_shouldReturnSameValue() throws Throwable {
+		Try<Object, Throwable> t = Try.success("X");
+		assertEquals("X", t.getOrThrow("Y"));
+	}
+
+	@Test
+	public void getOrThrowWithValue_givenTryIsSuccessWithNullValue_shouldReturnElseValue() throws Throwable {
+		Try<Object, Throwable> t = Try.success(null);
+		assertEquals("Y", t.getOrThrow("Y"));
+	}
+
+	@Test
 	public void isPresent_givenTryIsSuccessWithValue_shouldHaveValue() throws Throwable {
 		Try<Object, Throwable> t = Try.success("X");
 		assertTrue(t.isPresent());
@@ -225,6 +237,13 @@ public class TryTest {
 		exception.expect(IllegalAccessException.class);
 		Try<Object, Throwable> t = Try.failure(new IllegalAccessException());
 		t.getOrThrow();
+	}
+
+	@Test
+	public void getOrThrowWithValue_givenTryIsFailure_shouldThrowThrowable() throws Throwable {
+		exception.expect(IllegalAccessException.class);
+		Try<Object, Throwable> t = Try.failure(new IllegalAccessException());
+		t.getOrThrow("X");
 	}
  
 	@Test
