@@ -15,16 +15,12 @@ public class TryMain {
 
 		try {
 			Try.of(() -> serviceKO.doSomething()).ifPresentOrThrow(System.out::println);
-		} catch (Exception x) {
+		} catch (Throwable x) {
 			System.out.println(x.getMessage());
 		}
 
-		try {
-			Optional<String> value = Try.of(() -> serviceOK.doSomething()).map(x -> x.toUpperCase()).value();
-			value.ifPresent(System.out::println);
-		} catch (Exception x) {
-			System.out.println(x.getMessage());
-		}
+		Optional<String> value = Try.of(() -> serviceOK.doSomething()).map(x -> x.toUpperCase()).value();
+		value.ifPresent(System.out::println);
 
 		try {
 			System.out.println(Try.of(mapper(), () -> serviceKO.doSomething()).getOrThrow());
@@ -33,7 +29,7 @@ public class TryMain {
 		}
 	}
 
-	private static Function<Exception, IOException> mapper() {
+	private static Function<Throwable, IOException> mapper() {
 		return e -> (e instanceof IOException) ? (IOException)e : new IOException("IOError", e);
 	}
 	

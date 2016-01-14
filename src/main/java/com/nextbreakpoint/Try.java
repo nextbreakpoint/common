@@ -9,13 +9,14 @@ package com.nextbreakpoint;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Try<V, E extends Throwable> {
-    protected final Function<Exception, E> mapper;  
+    protected final Function<Throwable, E> mapper;  
     
-	private Try(Function<Exception, E> mapper) {
+	private Try(Function<Throwable, E> mapper) {
         Objects.requireNonNull(mapper);
 	    this.mapper = mapper;
 	}
@@ -34,7 +35,7 @@ public abstract class Try<V, E extends Throwable> {
 
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
-    public abstract Try<V, E> or(TrySupplier<V> block);
+    public abstract Try<V, E> or(Callable<V> block);
 
     public abstract Optional<V> value();
 
@@ -44,48 +45,48 @@ public abstract class Try<V, E extends Throwable> {
 	
 	public abstract V getOrThrow() throws E;
 
-    public static <V, E extends Throwable> Try<V, E> of(Function<Exception, E> mapper, TrySupplier<V> supplier) {
-        Objects.requireNonNull(supplier);
+    public static <V, E extends Throwable> Try<V, E> of(Function<Throwable, E> mapper, Callable<V> callable) {
+        Objects.requireNonNull(callable);
         try {
-        	return Try.success(mapper, supplier.supply());
+        	return Try.success(mapper, callable.call());
         } catch (Exception e) {
         	return Try.failure(mapper, mapper.apply(e));
         }
     }
 
-    public static <V, E extends Throwable> Try<V, E> failure(Function<Exception, E> mapper, E e) {
+    public static <V, E extends Throwable> Try<V, E> failure(Function<Throwable, E> mapper, E e) {
 		return new Failure<>(mapper, e);
 	}
 
-    public static <V, E extends Throwable> Try<V, E> success(Function<Exception, E> mapper, V value) {
+    public static <V, E extends Throwable> Try<V, E> success(Function<Throwable, E> mapper, V value) {
 		return new Success<>(mapper, value);
 	}
 
-    public static <V> Try<V, Exception> of(TrySupplier<V> supplier) {
-        Objects.requireNonNull(supplier);
+    public static <V> Try<V, Throwable> of(Callable<V> callable) {
+        Objects.requireNonNull(callable);
         try {
-        	return Try.success(defaultMapper(), supplier.supply());
+        	return Try.success(defaultMapper(), callable.call());
         } catch (Exception e) {
         	return Try.failure(defaultMapper(), e);
         }
     }
 
-    public static <V> Try<V, Exception> failure(Exception e) {
+    public static <V> Try<V, Throwable> failure(Throwable e) {
 		return new Failure<>(defaultMapper(), e);
 	}
 
-    public static <V> Try<V, Exception> success(V value) {
+    public static <V> Try<V, Throwable> success(V value) {
 		return new Success<>(defaultMapper(), value);
 	}
 
-	private static Function<Exception, Exception> defaultMapper() {
+	private static Function<Throwable, Throwable> defaultMapper() {
 		return x -> x;
 	}
 
 	private static class Failure<V, E extends Throwable> extends Try<V, E> {
 		private E exception;
 
-		public Failure(Function<Exception, E> mapper, E e) {
+		public Failure(Function<Throwable, E> mapper, E e) {
 		    super(mapper);
 		    Objects.requireNonNull(e);
 			this.exception = e;
@@ -109,9 +110,9 @@ public abstract class Try<V, E extends Throwable> {
 			return Try.failure(mapper, exception);
 		}
 		
-	    public Try<V, E> or(TrySupplier<V> supplier) {
+	    public Try<V, E> or(Callable<V> callable) {
             try {
-                return Try.success(mapper, supplier.supply());   
+                return Try.success(mapper, callable.call());   
             } catch (Exception e) {
                 return Try.failure(mapper, mapper.apply(e));
             }
@@ -149,7 +150,7 @@ public abstract class Try<V, E extends Throwable> {
 	private static class Success<V, E extends Throwable> extends Try<V, E> {
 		private final Optional<V> optional;
 
-		public Success(Function<Exception, E> mapper, V value) {
+		public Success(Function<Throwable, E> mapper, V value) {
             super(mapper);
 			this.optional = Optional.ofNullable(value);
 		}
@@ -175,7 +176,7 @@ public abstract class Try<V, E extends Throwable> {
 			}
 		}
 		
-	    public Try<V, E> or(TrySupplier<V> supplier) {
+	    public Try<V, E> or(Callable<V> callable) {
             return this;
 	    }
 
