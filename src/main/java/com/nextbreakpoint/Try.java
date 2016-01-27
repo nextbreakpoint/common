@@ -13,40 +13,114 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Try implements a functional API for dealing with checked or unchecked exceptions in Java 8
+ * 
+ * @author Andrea
+ *
+ * @param <V> the type of returned value
+ * @param <E> the type of captured exception
+ */
 public abstract class Try<V, E extends Throwable> {
+    /**
+     * The function to transform any exception into the expected exception
+     */
     protected final Function<Throwable, E> mapper;  
     
-	private Try(Function<Throwable, E> mapper) {
-        Objects.requireNonNull(mapper);
-	    this.mapper = mapper;
-	}
-
+	/**
+	 * Throws exception if present 
+	 * @throws E the captured exception
+	 */
 	public void throwException() throws E {}
 	
+	/**
+	 * Returns true if exception occurred
+	 * @return true when exception if present 
+	 */
 	public abstract boolean isFailure();
 
+	/**
+	 * Checks value is present
+	 * @return true when value is present
+	 */
 	public abstract boolean isPresent();
 
+	/**
+	 * Consumes value is present 
+	 * @param c the consumer
+	 */
 	public abstract void ifPresent(Consumer<V> c);
 
+	/**
+	 * Consumes value or throws exception
+	 * @param c the consumer
+	 * @throws E the captured exception
+	 */
 	public abstract void ifPresentOrThrow(Consumer<V> c) throws E;
 
+	/**
+	 * Maps value if present
+	 * @param func the function
+	 * @return new instance of given function result type  
+	 */
 	public abstract <R> Try<R, E> map(Function<V, R> func);
 
+	/**
+	 * Maps value if present
+	 * @param func the function
+	 * @return new instance of given function result type  
+	 */
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
-    public abstract Try<V, E> or(Callable<V> block);
+    /**
+     * Execute given callable if exception is present 
+     * @param callable the callable
+     * @return new instance  
+     */
+    public abstract Try<V, E> or(Callable<V> callable);
 
+    /**
+     * Returns optional of current value
+     * @return the optional
+     */
     public abstract Optional<V> value();
 
+	/**
+	 * Returns the current value. 
+	 * Throws NoSuchElementException if value not present 
+	 * @return the value
+	 */
 	public abstract V get();
 
+	/**
+	 * Returns the current value if present or returns a default value 
+	 * @param value the default value
+	 * @return the value
+	 */
 	public abstract V getOrElse(V value);
 	
+	/**
+	 * Returns the current value or throws exception if present
+	 * Throws NoSuchElementException if value not present 
+	 * @return the value
+	 * @throws E the captured exception
+	 */
 	public abstract V getOrThrow() throws E;
 
+	/**
+	 * Returns the current value or throws exception if present or returns a default value
+	 * @param value the default value
+	 * @return the value
+	 * @throws E the captured exception
+	 */
 	public abstract V getOrThrow(V value) throws E;
 
+    /**
+     * Creates new instance of given mapper and callable
+     * @param mapper the mapper
+     * @param callable the callable
+     * @return new instance of given mapper and callable
+     */
     public static <V, E extends Throwable> Try<V, E> of(Function<Throwable, E> mapper, Callable<V> callable) {
         Objects.requireNonNull(callable);
         try {
@@ -56,14 +130,31 @@ public abstract class Try<V, E extends Throwable> {
         }
     }
 
+    /**
+     * Creates new instance of given mapper and exception
+     * @param mapper the mapper
+     * @param e the exception
+     * @return new instance of given mapper and exception
+     */
     public static <V, E extends Throwable> Try<V, E> failure(Function<Throwable, E> mapper, E e) {
 		return new Failure<>(mapper, e);
 	}
 
+    /**
+     * Creates new instance of given mapper and value
+     * @param mapper the mapper
+     * @param value the value
+     * @return new instance of given mapper and value
+     */
     public static <V, E extends Throwable> Try<V, E> success(Function<Throwable, E> mapper, V value) {
 		return new Success<>(mapper, value);
 	}
 
+    /**
+     * Creates new instance of given callable
+     * @param callable the callable
+     * @return new instance of given callable
+     */
     public static <V> Try<V, Throwable> of(Callable<V> callable) {
         Objects.requireNonNull(callable);
         try {
@@ -73,12 +164,27 @@ public abstract class Try<V, E extends Throwable> {
         }
     }
 
+    /**
+     * Creates new instance of given exception
+     * @param e the exception
+     * @return new instance of given exception
+     */
     public static <V> Try<V, Throwable> failure(Throwable e) {
 		return new Failure<>(defaultMapper(), e);
 	}
 
+    /**
+     * Creates new instance of given value
+     * @param value the value
+     * @return new instance of given value
+     */
     public static <V> Try<V, Throwable> success(V value) {
 		return new Success<>(defaultMapper(), value);
+	}
+
+	private Try(Function<Throwable, E> mapper) {
+        Objects.requireNonNull(mapper);
+	    this.mapper = mapper;
 	}
 
 	private static Function<Throwable, Throwable> defaultMapper() {
