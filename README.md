@@ -1,4 +1,4 @@
-# Try
+# Try 1.2
 
 Try implements a functional API for dealing with checked or unchecked exceptions in Java 8
 
