@@ -61,14 +61,16 @@ public abstract class Try<V, E extends Throwable> {
 	/**
 	 * Maps value if present.
 	 * @param func the function
-	 * @return new instance of given function result type  
+	 * @param <R> the result type
+	 * @return new instance of given function result type
 	 */
 	public abstract <R> Try<R, E> map(Function<V, R> func);
 
 	/**
 	 * Maps value if present.
 	 * @param func the function
-	 * @return new instance of given function result type  
+	 * @param <R> the result type
+	 * @return new instance of given function result type
 	 */
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
@@ -119,9 +121,11 @@ public abstract class Try<V, E extends Throwable> {
      * Creates new instance of given mapper and callable.
      * @param mapper the mapper
      * @param callable the callable
+	 * @param <R> the result type
+	 * @param <E> the exception type
      * @return new instance of given mapper and callable
      */
-    public static <V, E extends Throwable> Try<V, E> of(Function<Throwable, E> mapper, Callable<V> callable) {
+    public static <R, E extends Throwable> Try<R, E> of(Function<Throwable, E> mapper, Callable<R> callable) {
         Objects.requireNonNull(callable);
         try {
         	return Try.success(mapper, callable.call());
@@ -134,9 +138,11 @@ public abstract class Try<V, E extends Throwable> {
      * Creates new instance of given mapper and exception.
      * @param mapper the mapper
      * @param e the exception
+	 * @param <R> the result type
+	 * @param <E> the exception type
      * @return new instance of given mapper and exception
      */
-    public static <V, E extends Throwable> Try<V, E> failure(Function<Throwable, E> mapper, E e) {
+    public static <R, E extends Throwable> Try<R, E> failure(Function<Throwable, E> mapper, E e) {
 		return new Failure<>(mapper, e);
 	}
 
@@ -144,18 +150,21 @@ public abstract class Try<V, E extends Throwable> {
      * Creates new instance of given mapper and value.
      * @param mapper the mapper
      * @param value the value
+	 * @param <R> the result type
+	 * @param <E> the exception type
      * @return new instance of given mapper and value
      */
-    public static <V, E extends Throwable> Try<V, E> success(Function<Throwable, E> mapper, V value) {
+    public static <R, E extends Throwable> Try<R, E> success(Function<Throwable, E> mapper, R value) {
 		return new Success<>(mapper, value);
 	}
 
     /**
      * Creates new instance of given callable.
      * @param callable the callable
+	 * @param <R> the result type
      * @return new instance of given callable
      */
-    public static <V> Try<V, Throwable> of(Callable<V> callable) {
+    public static <R> Try<R, Throwable> of(Callable<R> callable) {
         Objects.requireNonNull(callable);
         try {
         	return Try.success(defaultMapper(), callable.call());
@@ -167,18 +176,20 @@ public abstract class Try<V, E extends Throwable> {
     /**
      * Creates new instance of given exception.
      * @param e the exception
+	 * @param <R> the result type
      * @return new instance of given exception
      */
-    public static <V> Try<V, Throwable> failure(Throwable e) {
+    public static <R> Try<R, Throwable> failure(Throwable e) {
 		return new Failure<>(defaultMapper(), e);
 	}
 
     /**
      * Creates new instance of given value.
      * @param value the value
+	 * @param <R> the result type
      * @return new instance of given value
      */
-    public static <V> Try<V, Throwable> success(V value) {
+    public static <R> Try<R, Throwable> success(R value) {
 		return new Success<>(defaultMapper(), value);
 	}
 
