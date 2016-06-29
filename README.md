@@ -1,6 +1,6 @@
-# Try 1.3
+# Try 1.3.0
 
-Try implements a functional API for dealing with checked or unchecked exceptions in Java 8
+Try implements a functional API for handling checked and unchecked exceptions.
 
 ## Example
 
