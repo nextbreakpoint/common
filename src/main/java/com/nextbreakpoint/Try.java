@@ -119,16 +119,28 @@ public abstract class Try<V, E extends Throwable> {
 
 	/**
 	 * Consumes exception if present.
+	 * @param c the consumer
 	 */
-	public abstract Try<V, E> ifFailure(Consumer<E> consumer);
+	public abstract void ifFailure(Consumer<E> c);
 
 	/**
 	 * Consumes the current value if present.
+	 * @param c the consumer
+	 * @return new instance with given function result type
 	 */
-	public Try<V, E> peek(Consumer<V> consumer) {
+	public Try<V, E> onSuccess(Consumer<V> c) {
 		if (isPresent()) {
-			consumer.accept(get());
+			c.accept(get());
 		}
+		return this;
+	}
+
+	/**
+	 * Consumes the current exception if present.
+	 * @param c the consumer
+	 * @return new instance with given function result type
+	 */
+	public Try<V, E> onFailure(Consumer<E> c) {
 		return this;
 	}
 
@@ -226,12 +238,10 @@ public abstract class Try<V, E extends Throwable> {
 			this.exception = e;
 		}
 
-		@Override
 		public boolean isFailure() {
 			return true;
 		}
 
-		@Override
 		public void throwException() throws E {
 			throw this.exception;
 		}
@@ -279,13 +289,16 @@ public abstract class Try<V, E extends Throwable> {
 			throw exception;
 	    }
 		
-		@Override
 		public Optional<V> value() {
 			return Optional.empty();
 		}
 
-		public Try<V, E> ifFailure(Consumer<E> consumer) {
-			consumer.accept(exception);
+		public void ifFailure(Consumer<E> c) {
+			c.accept(exception);
+		}
+
+		public Try<V, E> onFailure(Consumer<E> c) {
+			c.accept(exception);
 			return this;
 		}
 	}
@@ -298,7 +311,6 @@ public abstract class Try<V, E extends Throwable> {
 			this.value = value;
 		}
 
-		@Override
 		public boolean isFailure() {
 			return false;
 		}
@@ -351,13 +363,11 @@ public abstract class Try<V, E extends Throwable> {
 	        return getOrElse(value);
 	    }
 		
-		@Override
 		public Optional<V> value() {
 			return Optional.ofNullable(value);
 		}
 
-		public Try<V, E> ifFailure(Consumer<E> consumer) {
-			return this;
+		public void ifFailure(Consumer<E> c) {
 		}
 	}
 }

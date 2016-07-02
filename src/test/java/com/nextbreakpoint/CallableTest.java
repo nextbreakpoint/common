@@ -135,10 +135,18 @@ public class CallableTest {
 	}
 
 	@Test
-	public void peekShouldNotCallConsumerWhenValueIsNull() {
+	public void onSuccessShouldNotCallConsumerWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.of(() -> null).peek(consumer);
+		Try.of(() -> null).onSuccess(consumer);
+		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
+	public void onFailureShouldNotCallConsumerWhenValueIsNull() {
+		@SuppressWarnings("unchecked")
+		Consumer<Throwable> consumer = mock(Consumer.class);
+		Try.of(() -> null).onFailure(consumer);
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
@@ -239,11 +247,19 @@ public class CallableTest {
 	}
 
 	@Test
-	public void peekShouldCallConsumerWhenValueIsNotNull() {
+	public void onSuccessShouldCallConsumerWhenValueIsNotNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<String> consumer = mock(Consumer.class);
-		Try.of(() -> "X").peek(consumer);
+		Try.of(() -> "X").onSuccess(consumer);
 		verify(consumer, times(1)).accept(anyString());
+	}
+
+	@Test
+	public void onFailureShouldNotCallConsumerWhenValueIsNotNull() {
+		@SuppressWarnings("unchecked")
+		Consumer<Throwable> consumer = mock(Consumer.class);
+		Try.of(() -> "X").onFailure(consumer);
+		verify(consumer, times(0)).accept(anyObject());
 	}
 
 	@Test
@@ -331,11 +347,19 @@ public class CallableTest {
 	}
 
 	@Test
-	public void peekShouldNotCallConsumerWhenCallableThrowsException() {
+	public void onSuccessShouldNotCallConsumerWhenCallableThrowsException() {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.of(() -> { throw  new Exception(); }).peek(consumer);
+		Try.of(() -> { throw  new Exception(); }).onSuccess(consumer);
 		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
+	public void onFailureShouldCallConsumerWhenCallableThrowsException() {
+		@SuppressWarnings("unchecked")
+		Consumer<Throwable> consumer = mock(Consumer.class);
+		Try.of(() -> { throw  new Exception(); }).onFailure(consumer);
+		verify(consumer, times(1)).accept(anyObject());
 	}
 
 	@Test

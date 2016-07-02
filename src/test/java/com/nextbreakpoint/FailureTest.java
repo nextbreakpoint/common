@@ -136,10 +136,18 @@ public class FailureTest {
 	}
 
 	@Test
-	public void peekShouldNotCallConsumer() {
+	public void onSuccessShouldNotCallConsumer() {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.failure(new Exception()).peek(consumer);
+		Try.failure(new Exception()).onSuccess(consumer);
 		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
+	public void onFailureShouldCallConsumer() {
+		@SuppressWarnings("unchecked")
+		Consumer<Throwable> consumer = mock(Consumer.class);
+		Try.failure(new Exception()).onFailure(consumer);
+		verify(consumer, times(1)).accept(anyObject());
 	}
 }

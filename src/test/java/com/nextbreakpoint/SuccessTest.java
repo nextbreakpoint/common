@@ -133,10 +133,18 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void peekShouldNotCallConsumerWhenValueIsNull() {
+	public void onSuccessShouldNotCallConsumerWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.success(null).peek(consumer);
+		Try.success(null).onSuccess(consumer);
+		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
+	public void onFailureShouldNotCallConsumerWhenValueIsNull() {
+		@SuppressWarnings("unchecked")
+		Consumer<Throwable> consumer = mock(Consumer.class);
+		Try.success(null).onFailure(consumer);
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
@@ -237,10 +245,18 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void peekShouldCallConsumerWhenValueIsNotNull() {
+	public void onSuccessShouldCallConsumerWhenValueIsNotNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<String> consumer = mock(Consumer.class);
-		Try.success("X").peek(consumer);
+		Try.success("X").onSuccess(consumer);
 		verify(consumer, times(1)).accept(anyString());
+	}
+
+	@Test
+	public void onFailureShouldNotCallConsumerWhenValueIsNotNull() {
+		@SuppressWarnings("unchecked")
+		Consumer<Throwable> consumer = mock(Consumer.class);
+		Try.success("X").onFailure(consumer);
+		verify(consumer, times(0)).accept(anyObject());
 	}
 }
