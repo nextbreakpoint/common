@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Try implements a functional API for dealing with checked or unchecked exceptions.
+ * Try implements a functional API for handling checked and unchecked exceptions.
  * 
  * @author Andrea Medeghini
  *
