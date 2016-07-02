@@ -14,16 +14,16 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Try implements a functional API for dealing with checked or unchecked exceptions in Java 8.
+ * Try implements a functional API for dealing with checked or unchecked exceptions.
  * 
- * @author Andrea
+ * @author Andrea Medeghini
  *
  * @param <V> the type of returned value
  * @param <E> the type of captured exception
  */
 public abstract class Try<V, E extends Throwable> {
     /**
-     * The function to transform any exception into the expected exception.
+     * The function to transform an exception into the expected exception.
      */
     protected final Function<Throwable, E> mapper;  
     
@@ -46,13 +46,13 @@ public abstract class Try<V, E extends Throwable> {
 	public abstract boolean isPresent();
 
 	/**
-	 * Consumes value is present. 
+	 * Consumes value if present.
 	 * @param c the consumer
 	 */
 	public abstract void ifPresent(Consumer<V> c);
 
 	/**
-	 * Consumes value or throws exception.
+	 * Consumes value if present or throws exception if present.
 	 * @param c the consumer
 	 * @throws E the captured exception
 	 */
@@ -62,7 +62,7 @@ public abstract class Try<V, E extends Throwable> {
 	 * Maps value if present.
 	 * @param func the function
 	 * @param <R> the result type
-	 * @return new instance of given function result type
+	 * @return new instance with given function result type
 	 */
 	public abstract <R> Try<R, E> map(Function<V, R> func);
 
@@ -70,12 +70,12 @@ public abstract class Try<V, E extends Throwable> {
 	 * Maps value if present.
 	 * @param func the function
 	 * @param <R> the result type
-	 * @return new instance of given function result type
+	 * @return new instance with given function result type
 	 */
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
     /**
-     * Execute given callable if exception is present.
+     * Executes callable if exception is present.
      * @param callable the callable
      * @return new instance  
      */
@@ -102,7 +102,7 @@ public abstract class Try<V, E extends Throwable> {
 	public abstract V getOrElse(V value);
 	
 	/**
-	 * Returns the current value or throws exception if present.
+	 * Returns the current value if present or throws exception if present.
 	 * Throws NoSuchElementException if value not present.
 	 * @return the value
 	 * @throws E the captured exception
@@ -110,20 +110,35 @@ public abstract class Try<V, E extends Throwable> {
 	public abstract V getOrThrow() throws E;
 
 	/**
-	 * Returns the current value or throws exception if present or returns a default value.
+	 * Returns the current value if present or throws exception if present or returns a default value.
 	 * @param value the default value
 	 * @return the value
 	 * @throws E the captured exception
 	 */
 	public abstract V getOrThrow(V value) throws E;
 
+	/**
+	 * Consumes exception if present.
+	 */
+	public abstract Try<V, E> ifFailure(Consumer<E> consumer);
+
+	/**
+	 * Consumes the current value if present.
+	 */
+	public Try<V, E> peek(Consumer<V> consumer) {
+		if (isPresent()) {
+			consumer.accept(get());
+		}
+		return this;
+	}
+
     /**
-     * Creates new instance of given mapper and callable.
+     * Creates new instance with given mapper and callable.
      * @param mapper the mapper
      * @param callable the callable
 	 * @param <R> the result type
 	 * @param <E> the exception type
-     * @return new instance of given mapper and callable
+     * @return new instance with given mapper and callable
      */
     public static <R, E extends Throwable> Try<R, E> of(Function<Throwable, E> mapper, Callable<R> callable) {
         Objects.requireNonNull(callable);
@@ -135,34 +150,34 @@ public abstract class Try<V, E extends Throwable> {
     }
 
     /**
-     * Creates new instance of given mapper and exception.
+     * Creates new instance with given mapper and exception.
      * @param mapper the mapper
      * @param e the exception
 	 * @param <R> the result type
 	 * @param <E> the exception type
-     * @return new instance of given mapper and exception
+     * @return new instance with given mapper and exception
      */
     public static <R, E extends Throwable> Try<R, E> failure(Function<Throwable, E> mapper, E e) {
 		return new Failure<>(mapper, e);
 	}
 
     /**
-     * Creates new instance of given mapper and value.
+     * Creates new instance with given mapper and value.
      * @param mapper the mapper
      * @param value the value
 	 * @param <R> the result type
 	 * @param <E> the exception type
-     * @return new instance of given mapper and value
+     * @return new instance with given mapper and value
      */
     public static <R, E extends Throwable> Try<R, E> success(Function<Throwable, E> mapper, R value) {
 		return new Success<>(mapper, value);
 	}
 
     /**
-     * Creates new instance of given callable.
+     * Creates new instance with given callable.
      * @param callable the callable
 	 * @param <R> the result type
-     * @return new instance of given callable
+     * @return new instance with given callable
      */
     public static <R> Try<R, Throwable> of(Callable<R> callable) {
         Objects.requireNonNull(callable);
@@ -174,20 +189,20 @@ public abstract class Try<V, E extends Throwable> {
     }
 
     /**
-     * Creates new instance of given exception.
+     * Creates new instance with given exception.
      * @param e the exception
 	 * @param <R> the result type
-     * @return new instance of given exception
+     * @return new instance with given exception
      */
     public static <R> Try<R, Throwable> failure(Throwable e) {
 		return new Failure<>(defaultMapper(), e);
 	}
 
     /**
-     * Creates new instance of given value.
+     * Creates new instance with given value.
      * @param value the value
 	 * @param <R> the result type
-     * @return new instance of given value
+     * @return new instance with given value
      */
     public static <R> Try<R, Throwable> success(R value) {
 		return new Success<>(defaultMapper(), value);
@@ -268,14 +283,19 @@ public abstract class Try<V, E extends Throwable> {
 		public Optional<V> value() {
 			return Optional.empty();
 		}
+
+		public Try<V, E> ifFailure(Consumer<E> consumer) {
+			consumer.accept(exception);
+			return this;
+		}
 	}
 
 	private static class Success<V, E extends Throwable> extends Try<V, E> {
-		private final Optional<V> optional;
+		private final V value;
 
 		public Success(Function<Throwable, E> mapper, V value) {
             super(mapper);
-			this.optional = Optional.ofNullable(value);
+			this.value = value;
 		}
 
 		@Override
@@ -285,7 +305,7 @@ public abstract class Try<V, E extends Throwable> {
 
 		public <R> Try<R, E> map(Function<V, R> func) {
 			try {
-				return optional.map(value -> Try.success(mapper, func.apply(value))).orElseGet(() -> Try.success(mapper, null));
+				return value().map(value -> Try.success(mapper, func.apply(value))).orElseGet(() -> Try.success(mapper, null));
 			} catch (Exception e) {
 				return Try.failure(mapper, mapper.apply(e));
 			}
@@ -293,7 +313,7 @@ public abstract class Try<V, E extends Throwable> {
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
 			try {
-				return optional.map(value -> func.apply(value)).orElseGet(() -> Try.success(mapper, null));
+				return value().map(value -> func.apply(value)).orElseGet(() -> Try.success(mapper, null));
 			} catch (Exception e) {
 				return Try.failure(mapper, mapper.apply(e));
 			}
@@ -304,23 +324,23 @@ public abstract class Try<V, E extends Throwable> {
 	    }
 
 		public boolean isPresent() {
-			return optional.isPresent();
+			return value().isPresent();
 		}
 
 		public void ifPresent(Consumer<V> c) {
-			optional.ifPresent(c);
+			value().ifPresent(c);
 		}
 
 		public void ifPresentOrThrow(Consumer<V> c) {
-			optional.ifPresent(c);
+			value().ifPresent(c);
 		}
 
 		public V get() {
-			return optional.get();
+			return value().get();
 		}
 
 		public V getOrElse(V value) {
-			return optional.orElse(value);
+			return value().orElse(value);
 		}
 
 		public V getOrThrow() throws E {
@@ -333,7 +353,11 @@ public abstract class Try<V, E extends Throwable> {
 		
 		@Override
 		public Optional<V> value() {
-			return optional;
+			return Optional.ofNullable(value);
+		}
+
+		public Try<V, E> ifFailure(Consumer<E> consumer) {
+			return this;
 		}
 	}
 }
