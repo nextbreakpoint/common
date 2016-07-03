@@ -1,4 +1,4 @@
-# Try 1.3.1
+# Try 1.3.2
 
 Try implements a functional API for handling checked and unchecked exceptions.
 
