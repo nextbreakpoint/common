@@ -156,37 +156,37 @@ public class CallableTest {
 	}
 
 	@Test
-	public void isFailureShouldReturnFalseWhenCallableReturnsNotNull() {
+	public void isFailureShouldReturnFalseWhenCallableReturnsValue() {
 		assertFalse(Try.of(() -> "X").isFailure());
 	}
 
 	@Test
-	public void getShouldReturnValueWhenCallableReturnsNotNull() {
+	public void getShouldReturnValueWhenCallableReturnsValue() {
 		assertEquals("X", Try.of(() -> "X").get());
 	}
 
 	@Test
-	public void getOrElseShouldReturnValueWhenCallableReturnsNotNull() {
+	public void getOrElseShouldReturnValueWhenCallableReturnsValue() {
 		assertEquals("X", Try.of(() -> "X").getOrElse("Y"));
 	}
 
 	@Test
-	public void getOrThrowShouldReturnValueWhenCallableReturnsNotNull() throws Throwable {
+	public void getOrThrowShouldReturnValueWhenCallableReturnsValue() throws Throwable {
 		assertEquals("X", Try.of(() -> "X").getOrThrow());
 	}
 
 	@Test
-	public void getOrThrowWithErrorValueShouldReturnValueWhenCallableReturnsNotNull() throws Throwable {
+	public void getOrThrowWithErrorValueShouldReturnValueWhenCallableReturnsValue() throws Throwable {
 		assertEquals("X", Try.of(() -> "X").getOrThrow("Y"));
 	}
 
 	@Test
-	public void isPresentShouldReturnTrueWhenCallableReturnsNotNull() throws Throwable {
+	public void isPresentShouldReturnTrueWhenCallableReturnsValue() throws Throwable {
 		assertTrue(Try.of(() -> "X").isPresent());
 	}
 
 	@Test
-	public void ifPresentWithConsumerShouldCallConsumerWhenCallableReturnsNotNull() throws Throwable {
+	public void ifPresentWithConsumerShouldCallConsumerWhenCallableReturnsValue() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Consumer<String> consumer = mock(Consumer.class);
 		Try.of(() -> "X").ifPresent(consumer);
@@ -194,7 +194,7 @@ public class CallableTest {
 	}
 
 	@Test
-	public void ifPresentOrThrowShouldCallConsumerWhenCallableReturnsNotNull() throws Throwable {
+	public void ifPresentOrThrowShouldCallConsumerWhenCallableReturnsValue() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Consumer<String> consumer = mock(Consumer.class);
 		Try.of(() -> "X").ifPresentOrThrow(consumer);
@@ -202,7 +202,7 @@ public class CallableTest {
 	}
 
 	@Test
-	public void ifFailureShouldNotCallConsumerWhenCallableReturnsNotNull() throws Throwable {
+	public void ifFailureShouldNotCallConsumerWhenCallableReturnsValue() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Consumer<Throwable> consumer = mock(Consumer.class);
 		Try.of(() -> "X").ifFailure(consumer);
@@ -210,17 +210,17 @@ public class CallableTest {
 	}
 
 	@Test
-	public void throwExceptionShouldNotThrowExceptionWhenCallableReturnsNotNull() throws Throwable {
+	public void throwExceptionShouldNotThrowExceptionWhenCallableReturnsValue() throws Throwable {
 		Try.of(() -> "X").throwException();
 	}
 
 	@Test
-	public void valueShouldReturnNotEmptyOptionalWhenCallableReturnsNotNull() throws Throwable {
+	public void valueShouldReturnNotEmptyOptionalWhenCallableReturnsValue() throws Throwable {
 		assertTrue(Try.of(() -> "X").value().isPresent());
 	}
 
 	@Test
-	public void mapShouldCallFunctionWhenCallableReturnsNotNull() throws Throwable {
+	public void mapShouldCallFunctionWhenCallableReturnsValue() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Function<String, Object> function = mock(Function.class);
 		Try.of(() -> "X").map(function);
@@ -228,7 +228,7 @@ public class CallableTest {
 	}
 
 	@Test
-	public void flatMapShouldCallFunctionWhenCallableReturnsNotNull() throws Throwable {
+	public void flatMapShouldCallFunctionWhenCallableReturnsValue() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Function<String, Try<Object, Throwable>> function = mock(Function.class);
 		Try.of(() -> "X").flatMap(function);
@@ -252,7 +252,7 @@ public class CallableTest {
 	}
 
 	@Test
-	public void onSuccessShouldCallConsumerWhenCallableReturnsNotNull() {
+	public void onSuccessShouldCallConsumerWhenCallableReturnsValue() {
 		@SuppressWarnings("unchecked")
 		Consumer<String> consumer = mock(Consumer.class);
 		Try.of(() -> "X").onSuccess(consumer);
@@ -260,7 +260,7 @@ public class CallableTest {
 	}
 
 	@Test
-	public void onFailureShouldNotCallConsumerWhenCallableReturnsNotNull() {
+	public void onFailureShouldNotCallConsumerWhenCallableReturnsValue() {
 		@SuppressWarnings("unchecked")
 		Consumer<Throwable> consumer = mock(Consumer.class);
 		Try.of(() -> "X").onFailure(consumer);
@@ -268,7 +268,7 @@ public class CallableTest {
 	}
 
 	@Test
-	public void convertShouldReturnSuccessWhenCallableReturnsNotNull() {
+	public void convertShouldReturnSuccessWhenCallableReturnsValue() {
 		assertFalse(Try.of(() -> "X").convert(testMapper()).isFailure());
 	}
 
