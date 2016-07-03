@@ -144,6 +144,14 @@ public abstract class Try<V, E extends Throwable> {
 		return this;
 	}
 
+	/**
+	 * Creates new instance with mapped exception.
+	 * @param mapper the mapper
+	 * @param <X> the exception type
+	 * @return new instance with given exception type
+	 */
+	public abstract <X extends Throwable> Try<V, X> convert(Function<Throwable, X> mapper);
+
     /**
      * Creates new instance with given mapper and callable.
      * @param mapper the mapper
@@ -301,6 +309,10 @@ public abstract class Try<V, E extends Throwable> {
 			c.accept(exception);
 			return this;
 		}
+
+		public <X extends Throwable> Try<V, X> convert(Function<Throwable, X> mapper) {
+			return Try.failure(mapper, mapper.apply(exception));
+		}
 	}
 
 	private static class Success<V, E extends Throwable> extends Try<V, E> {
@@ -368,6 +380,10 @@ public abstract class Try<V, E extends Throwable> {
 		}
 
 		public void ifFailure(Consumer<E> c) {
+		}
+
+		public <X extends Throwable> Try<V, X> convert(Function<Throwable, X> mapper) {
+			return Try.success(mapper, value);
 		}
 	}
 }

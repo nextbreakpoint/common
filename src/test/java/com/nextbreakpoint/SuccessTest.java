@@ -4,6 +4,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -149,6 +150,11 @@ public class SuccessTest {
 	}
 
 	@Test
+	public void convertShouldReturnSuccessWhenValueIsNull() {
+		assertFalse(Try.success(null).convert(testMapper()).isFailure());
+	}
+
+	@Test
 	public void isFailureShouldReturnFalseWhenValueIsNotNull() {
 		assertFalse(Try.success("X").isFailure());
 	}
@@ -258,5 +264,14 @@ public class SuccessTest {
 		Consumer<Throwable> consumer = mock(Consumer.class);
 		Try.success("X").onFailure(consumer);
 		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
+	public void convertShouldReturnSuccessWhenValueIsNotNull() {
+		assertFalse(Try.success("X").convert(testMapper()).isFailure());
+	}
+
+	private static Function<Throwable, IOException> testMapper() {
+		return e -> (e instanceof IOException) ? (IOException)e : new IOException("IO Error", e);
 	}
 }
