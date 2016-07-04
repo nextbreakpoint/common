@@ -96,8 +96,8 @@
 			<id>ossrh</id>
 			<activation>
 				<property>
-					<name>ossrh</name>
-					<value>true</value>
+					<name>repo</name>
+					<value>ossrh</value>
 				</property>
 			</activation>
 			<build>
@@ -134,6 +134,39 @@
 					<id>ossrh</id>
 					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 				</snapshotRepository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>bintray</id>
+			<activation>
+				<property>
+					<name>repo</name>
+					<value>bintray</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<distributionManagement>
+				<repository>
+					<id>bintray</id>
+					<url>https://api.bintray.com/maven/andrea-medeghini/maven/com.nextbreakpoint.try</url>
+				</repository>
 			</distributionManagement>
 		</profile>
 	</profiles>
