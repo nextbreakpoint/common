@@ -1,8 +1,24 @@
-# Try 1.3.2
+# Try 1.3.3
 
 Try implements a functional API for handling checked and unchecked exceptions.
 
-## Example
+## Better exceptions handling 
+
+If you are familiar with Stream and Optional classes in Java 8, you will find Try very useful.
+
+A typical fragment of code for handling exceptions in Java looks like:
+
+    try {
+        doSomething();
+    } catch (SomeException e) {
+        handleException(e);
+    }
+ 
+Using Try you can rewrite the same fragment of code in just one line:
+
+    Try.of(() -> doSomething()).onFailure(e -> handleException(e));
+
+## Other examples
 
 Given the program:
 
