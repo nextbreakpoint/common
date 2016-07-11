@@ -256,7 +256,7 @@ public class CallableTest {
 	@Test
 	public void onSuccessShouldCallConsumerWhenCallableReturnsValue() {
 		@SuppressWarnings("unchecked")
-		Consumer<String> consumer = mock(Consumer.class);
+		Consumer<Object> consumer = mock(Consumer.class);
 		Try.of(() -> "X").onSuccess(consumer).get();
 		verify(consumer, times(1)).accept(anyString());
 	}
@@ -407,7 +407,7 @@ public class CallableTest {
 
 	@Test
 	public void shouldReturnIOExceptionWhenCallableThrowsIOException() {
-		Consumer<Throwable> consumer = mock(Consumer.class);
+		Consumer<IOException> consumer = mock(Consumer.class);
 		Try.of(testMapper(), () -> { throw new IOException(); }).ifFailure(consumer);
 		verify(consumer, times(1)).accept(any(IOException.class));
 	}

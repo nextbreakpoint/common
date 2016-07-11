@@ -257,7 +257,7 @@ public class SuccessTest {
 	@Test
 	public void onSuccessShouldCallConsumerWhenValueIsNotNull() {
 		@SuppressWarnings("unchecked")
-		Consumer<String> consumer = mock(Consumer.class);
+		Consumer<Object> consumer = mock(Consumer.class);
 		Try.success("X").onSuccess(consumer).isPresent();
 		verify(consumer, times(1)).accept(anyString());
 	}
