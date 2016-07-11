@@ -118,21 +118,21 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void mapShouldCallFunctionWhenValueIsNull() {
+	public void mapShouldCallNotFunctionWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Function<Object, Object> function = mock(Function.class);
 		when(function.apply(null)).thenReturn("Y");
 		Try.success(null).map(function).getOrElse(null);
-		verify(function, times(1)).apply(any());
+		verify(function, times(0)).apply(any());
 	}
 
 	@Test
-	public void flatMapShouldCallFunctionWhenValueIsNull() {
+	public void flatMapShouldNotCallFunctionWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Function<Object, Try<Object, Throwable>> function = mock(Function.class);
 		when(function.apply(null)).thenReturn(Try.success("Y"));
 		Try.success(null).flatMap(function).getOrElse(null);
-		verify(function, times(1)).apply(any());
+		verify(function, times(0)).apply(any());
 	}
 
 	@Test

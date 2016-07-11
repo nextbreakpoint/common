@@ -407,7 +407,7 @@ public class CallableTest {
 
 	@Test
 	public void shouldReturnIOExceptionWhenCallableThrowsIOException() {
-		Consumer<IOException> consumer = mock(Consumer.class);
+		Consumer<Throwable> consumer = mock(Consumer.class);
 		Try.of(testMapper(), () -> { throw new IOException(); }).ifFailure(consumer);
 		verify(consumer, times(1)).accept(any(IOException.class));
 	}
