@@ -4,7 +4,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -20,35 +19,29 @@ public class SuccessTest {
 	public ExpectedException exception = ExpectedException.none();
 
 	@Test
-	public void shouldNotReturnNullWhenValueIsNull() {
+	public void shouldNotBeNullWhenValueIsNull() {
 		assertNotNull(Try.success(null));
 	}
 
 	@Test
-	public void shouldNotReturnNullWhenValueIsNullAndMapperIsNotNull() {
-		assertNotNull(Try.success(e -> e, null));
+	public void shouldNotBeNullWhenValueIsNotNull() {
+		assertNotNull(Try.success("X"));
+	}
+
+	@Test
+	public void shouldNotBeNullWhenValueIsNullAndMapperIsNotNull() {
+		assertNotNull(Try.success(null).withMapper(e -> e));
+	}
+
+	@Test
+	public void shouldNotBeNullWhenValueIsNotNullAndMapperIsNotNull() {
+		assertNotNull(Try.success("X").withMapper(e -> e));
 	}
 
 	@Test
 	public void shouldThrowNullPointerExceptionWhenMapperIsNull() {
 		exception.expect(NullPointerException.class);
-		Try.success(null, "X");
-	}
-
-	@Test
-	public void shouldThrowNullPointerExceptionWhenValueIsNullAndMapperIsNull() {
-		exception.expect(NullPointerException.class);
-		Try.success(null, null);
-	}
-
-	@Test
-	public void shouldNotReturnNullWhenValueIsNotNull() {
-		assertNotNull(Try.success("X"));
-	}
-
-	@Test
-	public void shouldNotReturnNullWhenValueIsNotNullAndMapperIsNotNull() {
-		assertNotNull(Try.success(e -> e, "X"));
+		Try.success("X").withMapper(null);
 	}
 
 	@Test
@@ -63,7 +56,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnElseValueWhenValueIsNull() {
+	public void getOrElseShouldReturnGivenDefaultWhenValueIsNull() {
 		assertEquals("X", Try.success(null).getOrElse("X"));
 	}
 
@@ -74,7 +67,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void getOrThrowWithErrorValueShouldReturnGivenValueWhenValueIsNull() throws Throwable {
+	public void getOrThrowWithDefaultValueShouldReturnDefaultValueWhenValueIsNull() throws Throwable {
 		assertEquals("X", Try.success(null).getOrThrow("X"));
 	}
 
@@ -118,7 +111,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void mapShouldCallNotFunctionWhenValueIsNull() {
+	public void mapShouldNotCallFunctionWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Function<Object, Object> function = mock(Function.class);
 		when(function.apply(null)).thenReturn("Y");
@@ -136,24 +129,19 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void onSuccessShouldNotCallConsumerWhenValueIsNull() {
+	public void shouldCallSuccessConsumerWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.success(null).onSuccess(consumer);
-		verify(consumer, times(0)).accept(anyObject());
+		Try.success(null).onSuccess(consumer).getOrElse(null);
+		verify(consumer, times(1)).accept(anyObject());
 	}
 
 	@Test
-	public void onFailureShouldNotCallConsumerWhenValueIsNull() {
+	public void shouldNotCallFailureConsumerWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<Throwable> consumer = mock(Consumer.class);
-		Try.success(null).onFailure(consumer);
+		Try.success(null).onFailure(consumer).getOrElse(null);
 		verify(consumer, times(0)).accept(anyObject());
-	}
-
-	@Test
-	public void convertShouldReturnSuccessWhenValueIsNull() {
-		assertFalse(Try.success(null).convert(testMapper()).isFailure());
 	}
 
 	@Test
@@ -177,7 +165,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void getOrThrowWithErrorValueShouldReturnValueWhenValueIsNotNull() throws Throwable {
+	public void getOrThrowWithDefaultValueShouldReturnValueWhenValueIsNotNull() throws Throwable {
 		assertEquals("X", Try.success("X").getOrThrow("Y"));
 	}
 
@@ -255,7 +243,25 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void onSuccessShouldCallConsumerWhenValueIsNotNull() {
+	public void mapShouldThrowNoSuchElementExceptionWhenFunctionReturnsNull() {
+		exception.expect(NoSuchElementException.class);
+		@SuppressWarnings("unchecked")
+		Function<String, Object> function = mock(Function.class);
+		when(function.apply(any())).thenReturn(null);
+		Try.success("X").map(function).get();
+	}
+
+	@Test
+	public void flatMapShouldThrowNoSuchElementExceptionWhenFunctionReturnsNull() {
+		exception.expect(NoSuchElementException.class);
+		@SuppressWarnings("unchecked")
+		Function<String, Try<Object, Throwable>> function = mock(Function.class);
+		when(function.apply(any())).thenReturn(null);
+		Try.success("X").flatMap(function).get();
+	}
+
+	@Test
+	public void shouldCallSuccessConsumerWhenValueIsNotNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try.success("X").onSuccess(consumer).isPresent();
@@ -263,19 +269,10 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void onFailureShouldNotCallConsumerWhenValueIsNotNull() {
+	public void shouldNotCallFailureConsumerWhenValueIsNotNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<Throwable> consumer = mock(Consumer.class);
 		Try.success("X").onFailure(consumer);
 		verify(consumer, times(0)).accept(anyObject());
-	}
-
-	@Test
-	public void convertShouldReturnSuccessWhenValueIsNotNull() {
-		assertFalse(Try.success("X").convert(testMapper()).isFailure());
-	}
-
-	private static Function<Throwable, IOException> testMapper() {
-		return e -> (e instanceof IOException) ? (IOException)e : new IOException("IO Error", e);
 	}
 }

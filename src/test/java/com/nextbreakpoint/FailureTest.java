@@ -25,31 +25,19 @@ public class FailureTest {
 	}
 
 	@Test
-	public void shouldThrowNullPointerExceptionWhenExceptionIsNullAndMapperIsNotNull() {
-		exception.expect(NullPointerException.class);
-		Try.failure(e -> e, null);
+	public void shouldNotBeNullWhenExceptionIsNotNull() {
+		assertNotNull(Try.failure(new Exception()));
+	}
+
+	@Test
+	public void shouldNotBeNullWhenExceptionIsNotNullAndMapperIsNotNull() {
+		assertNotNull(Try.failure(new Exception()).withMapper(e -> e));
 	}
 
 	@Test
 	public void shouldThrowNullPointerExceptionWhenMapperIsNull() {
 		exception.expect(NullPointerException.class);
-		Try.failure(null, new Exception());
-	}
-
-	@Test
-	public void shouldThrowNullPointerExceptionWhenExceptionIsNullAndMapperIsNull() {
-		exception.expect(NullPointerException.class);
-		Try.failure(null, null);
-	}
-
-	@Test
-	public void shouldNotReturnNullWhenExceptionIsNotNull() {
-		assertNotNull(Try.failure(new Exception()));
-	}
-
-	@Test
-	public void shouldNotReturnNullWhenExceptionIsNotNullAndMapperIsNotNull() {
-		assertNotNull(Try.failure(e -> e, new Exception()));
+		Try.failure(new Exception()).withMapper(null);
 	}
 
 	@Test
@@ -64,7 +52,7 @@ public class FailureTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnElseValue() {
+	public void getOrElseShouldReturnDefaultValue() {
 		assertEquals("X", Try.failure(new Throwable()).getOrElse("X"));
 	}
 
@@ -75,7 +63,7 @@ public class FailureTest {
 	}
 
 	@Test
-	public void getOrThrowWithValueShouldThrowException() throws Throwable {
+	public void getOrThrowWithDefaultValueShouldThrowException() throws Throwable {
 		exception.expect(IllegalAccessException.class);
 		Try.failure(new IllegalAccessException()).getOrThrow("X");
 	}
@@ -124,7 +112,7 @@ public class FailureTest {
 	public void mapShouldNotCallFunction() {
 		@SuppressWarnings("unchecked")
 		Function<Object, Object> function = mock(Function.class);
-		Try.failure(new Exception()).map(function);
+		Try.failure(new Exception()).map(function).getOrElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
@@ -132,20 +120,20 @@ public class FailureTest {
 	public void flatMapShouldNotCallFunction() {
 		@SuppressWarnings("unchecked")
 		Function<Object, Try<Object, Throwable>> function = mock(Function.class);
-		Try.failure(new Exception()).flatMap(function);
+		Try.failure(new Exception()).flatMap(function).getOrElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
-	public void onSuccessShouldNotCallConsumer() {
+	public void shouldNotCallSuccessConsumer() {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.failure(new Exception()).onSuccess(consumer);
+		Try.failure(new Exception()).onSuccess(consumer).getOrElse(null);
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
 	@Test
-	public void getShouldCallOnFailureHandler() {
+	public void shouldCallFailureConsumer() {
 		@SuppressWarnings("unchecked")
 		Consumer<Throwable> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).onFailure(consumer).getOrElse(null);
@@ -153,14 +141,9 @@ public class FailureTest {
 	}
 
 	@Test
-	public void convertShouldReturnFailure() {
-		assertTrue(Try.failure(new Exception()).convert(testMapper()).isFailure());
-	}
-
-	@Test
-	public void convertShouldReturnFailureWhichThrowsIOException() throws IOException {
+	public void shouldThrowsIOException() throws IOException {
 		exception.expect(IOException.class);
-		Try.failure(new Exception()).convert(testMapper()).throwException();
+		Try.failure(new Exception()).withMapper(testMapper()).throwException();
 	}
 
 	private static Function<Throwable, IOException> testMapper() {
