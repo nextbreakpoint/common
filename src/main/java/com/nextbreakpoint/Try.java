@@ -74,7 +74,7 @@ public abstract class Try<V, E extends Throwable> {
 	 */
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
-    /**
+	/**
      * Executes callable if exception is present.
      * @param callable the callable
      * @return new instance  
@@ -229,7 +229,7 @@ public abstract class Try<V, E extends Throwable> {
 	}
 
 	private Try(Function<Throwable, E> mapper) {
-        Objects.requireNonNull(mapper);
+		Objects.requireNonNull(mapper);
 	    this.mapper = mapper;
 	}
 
@@ -238,40 +238,24 @@ public abstract class Try<V, E extends Throwable> {
 	}
 
 	private static class Failure<V, E extends Throwable> extends Try<V, E> {
-		private E exception;
+		private final E exception;
 
-		public Failure(Function<Throwable, E> mapper, E e) {
+		public Failure(Function<Throwable, E> mapper, E exception) {
 		    super(mapper);
-		    Objects.requireNonNull(e);
-			this.exception = e;
+		    Objects.requireNonNull(exception);
+			this.exception = exception;
 		}
 
 		public boolean isFailure() {
 			return true;
 		}
 
-		public void throwException() throws E {
-			throw this.exception;
-		}
-
-		public <R> Try<R, E> map(Function<V, R> func) {
-			return Try.failure(mapper, exception);
-		}
-
-		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
-			return Try.failure(mapper, exception);
-		}
-		
-	    public Try<V, E> or(Callable<V> callable) {
-            try {
-                return Try.success(mapper, callable.call());   
-            } catch (Exception e) {
-                return Try.failure(mapper, mapper.apply(e));
-            }
-	    }
-
 		public boolean isPresent() {
 			return false;
+		}
+
+		public void ifFailure(Consumer<E> c) {
+			c.accept(exception);
 		}
 
 		public void ifPresent(Consumer<V> c) {
@@ -301,13 +285,20 @@ public abstract class Try<V, E extends Throwable> {
 			return Optional.empty();
 		}
 
-		public void ifFailure(Consumer<E> c) {
-			c.accept(exception);
+		public void throwException() throws E {
+			throw exception;
 		}
 
-		public Try<V, E> onFailure(Consumer<E> c) {
-			c.accept(exception);
-			return this;
+		public <R> Try<R, E> map(Function<V, R> func) {
+			return Try.failure(mapper, exception);
+		}
+
+		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
+			return Try.failure(mapper, exception);
+		}
+
+		public Try<V, E> or(Callable<V> callable) {
+			return Try.of(mapper, callable);
 		}
 
 		public <X extends Throwable> Try<V, X> convert(Function<Throwable, X> mapper) {
@@ -327,28 +318,11 @@ public abstract class Try<V, E extends Throwable> {
 			return false;
 		}
 
-		public <R> Try<R, E> map(Function<V, R> func) {
-			try {
-				return value().map(value -> Try.success(mapper, func.apply(value))).orElseGet(() -> Try.success(mapper, null));
-			} catch (Exception e) {
-				return Try.failure(mapper, mapper.apply(e));
-			}
-		}
-
-		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
-			try {
-				return value().map(value -> func.apply(value)).orElseGet(() -> Try.success(mapper, null));
-			} catch (Exception e) {
-				return Try.failure(mapper, mapper.apply(e));
-			}
-		}
-		
-	    public Try<V, E> or(Callable<V> callable) {
-            return this;
-	    }
-
 		public boolean isPresent() {
 			return value().isPresent();
+		}
+
+		public void ifFailure(Consumer<E> c) {
 		}
 
 		public void ifPresent(Consumer<V> c) {
@@ -379,11 +353,102 @@ public abstract class Try<V, E extends Throwable> {
 			return Optional.ofNullable(value);
 		}
 
-		public void ifFailure(Consumer<E> c) {
+		public void throwException() throws E {
+		}
+
+		public <R> Try<R, E> map(Function<V, R> func) {
+			return Try.of(mapper, () -> func.apply(value));
+		}
+
+		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
+			return Try.of(mapper, () -> func.apply(value)).getOrElse(Try.of(mapper, () -> null));
+		}
+
+		public Try<V, E> or(Callable<V> callable) {
+			return this;
 		}
 
 		public <X extends Throwable> Try<V, X> convert(Function<Throwable, X> mapper) {
 			return Try.success(mapper, value);
+		}
+	}
+
+	private static class TryCallable<V, E extends Throwable> extends Try<V, E> {
+		protected final Callable<V> callable;
+
+		public TryCallable(Function<Throwable, E> mapper, Callable<V> callable) {
+			super(mapper);
+			Objects.requireNonNull(callable);
+			this.callable = callable;
+		}
+
+		public boolean isFailure() {
+			return evaluate().isFailure();
+		}
+
+		public boolean isPresent() {
+			return evaluate().isPresent();
+		}
+
+		public void ifFailure(Consumer<E> c) {
+			evaluate().ifFailure(c);
+		}
+
+		public void ifPresent(Consumer<V> c) {
+			evaluate().ifPresent(c);
+		}
+
+		public void ifPresentOrThrow(Consumer<V> c) {
+			evaluate().ifPresent(c);
+		}
+
+		public V get() {
+			return evaluate().get();
+		}
+
+		public V getOrElse(V value) {
+			return evaluate().getOrElse(value);
+		}
+
+		public V getOrThrow() throws E {
+			return evaluate().getOrThrow();
+		}
+
+		public V getOrThrow(V value) throws E {
+			return evaluate().getOrThrow(value);
+		}
+
+		public Optional<V> value() {
+			return evaluate().value();
+		}
+
+		public <X extends Throwable> Try<V, X> convert(Function<Throwable, X> mapper) {
+			return Try.of(mapper, callable);
+		}
+
+		public void throwException() throws E {
+			evaluate().throwException();
+		}
+
+		public <R> Try<R, E> map(Function<V, R> func) {
+			return Try.of(mapper, () -> func.apply(callable.call()));
+		}
+
+		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
+			return Try.of(mapper, () -> func.apply(callable.call())).getOrElse(Try.of(mapper, () -> null));
+		}
+
+		public Try<V, E> or(Callable<V> callable) {
+			//todo
+			return this;
+		}
+
+		private Try<V, E> evaluate() {
+			try {
+				return Try.success(mapper, callable.call());
+			} catch (Exception e) {
+				return Try.failure(mapper, mapper.apply(e));
+			}
 		}
 	}
 }
