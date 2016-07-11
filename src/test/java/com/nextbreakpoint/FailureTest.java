@@ -145,10 +145,10 @@ public class FailureTest {
 	}
 
 	@Test
-	public void onFailureShouldCallConsumer() {
+	public void getShouldCallOnFailureHandler() {
 		@SuppressWarnings("unchecked")
 		Consumer<Throwable> consumer = mock(Consumer.class);
-		Try.failure(new Exception()).onFailure(consumer);
+		Try.failure(new Exception()).onFailure(consumer).getOrElse(null);
 		verify(consumer, times(1)).accept(anyObject());
 	}
 

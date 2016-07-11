@@ -118,19 +118,21 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void mapShouldNotCallFunctionWhenValueIsNull() {
+	public void mapShouldCallFunctionWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Function<Object, Object> function = mock(Function.class);
-		Try.success(null).map(function);
-		verify(function, times(0)).apply(any());
+		when(function.apply(null)).thenReturn("Y");
+		Try.success(null).map(function).getOrElse(null);
+		verify(function, times(1)).apply(any());
 	}
 
 	@Test
-	public void flatMapShouldNotCallFunctionWhenValueIsNull() {
+	public void flatMapShouldCallFunctionWhenValueIsNull() {
 		@SuppressWarnings("unchecked")
 		Function<Object, Try<Object, Throwable>> function = mock(Function.class);
-		Try.success(null).flatMap(function);
-		verify(function, times(0)).apply(any());
+		when(function.apply(null)).thenReturn(Try.success("Y"));
+		Try.success(null).flatMap(function).getOrElse(null);
+		verify(function, times(1)).apply(any());
 	}
 
 	@Test
@@ -222,7 +224,8 @@ public class SuccessTest {
 	public void mapShouldCallFunctionWhenValueIsNotNull() {
 		@SuppressWarnings("unchecked")
 		Function<String, Object> function = mock(Function.class);
-		Try.success("X").map(function);
+		when(function.apply("X")).thenReturn("Y");
+		Try.success("X").map(function).get();
 		verify(function, times(1)).apply("X");
 	}
 
@@ -230,7 +233,8 @@ public class SuccessTest {
 	public void flatMapShouldCallFunctionWhenValueIsNotNull() {
 		@SuppressWarnings("unchecked")
 		Function<String, Try<Object, Throwable>> function = mock(Function.class);
-		Try.success("X").flatMap(function);
+		when(function.apply("X")).thenReturn(Try.success("Y"));
+		Try.success("X").flatMap(function).get();
 		verify(function, times(1)).apply("X");
 	}
 
@@ -254,7 +258,7 @@ public class SuccessTest {
 	public void onSuccessShouldCallConsumerWhenValueIsNotNull() {
 		@SuppressWarnings("unchecked")
 		Consumer<String> consumer = mock(Consumer.class);
-		Try.success("X").onSuccess(consumer);
+		Try.success("X").onSuccess(consumer).isPresent();
 		verify(consumer, times(1)).accept(anyString());
 	}
 

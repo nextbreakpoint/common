@@ -223,7 +223,8 @@ public class CallableTest {
 	public void mapShouldCallFunctionWhenCallableReturnsValue() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Function<String, Object> function = mock(Function.class);
-		Try.of(() -> "X").map(function);
+		when(function.apply("X")).thenReturn("Y");
+		Try.of(() -> "X").map(function).get();
 		verify(function, times(1)).apply("X");
 	}
 
@@ -231,7 +232,8 @@ public class CallableTest {
 	public void flatMapShouldCallFunctionWhenCallableReturnsValue() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Function<String, Try<Object, Throwable>> function = mock(Function.class);
-		Try.of(() -> "X").flatMap(function);
+		when(function.apply("X")).thenReturn(Try.of(() -> "Y"));
+		Try.of(() -> "X").flatMap(function).get();
 		verify(function, times(1)).apply("X");
 	}
 
@@ -255,7 +257,7 @@ public class CallableTest {
 	public void onSuccessShouldCallConsumerWhenCallableReturnsValue() {
 		@SuppressWarnings("unchecked")
 		Consumer<String> consumer = mock(Consumer.class);
-		Try.of(() -> "X").onSuccess(consumer);
+		Try.of(() -> "X").onSuccess(consumer).get();
 		verify(consumer, times(1)).accept(anyString());
 	}
 
@@ -274,42 +276,42 @@ public class CallableTest {
 
 	@Test
 	public void isFailureShouldReturnTrueWhenCallableThrowsException() {
-		assertTrue(Try.of(() -> { throw  new Exception(); }).isFailure());
+		assertTrue(Try.of(() -> { throw new Exception(); }).isFailure());
 	}
 
 	@Test
 	public void getShouldThrowNoSuchElementExceptionWhenCallableThrowsException() {
 		exception.expect(NoSuchElementException.class);
-		Try.of(() -> { throw  new Exception(); }).get();
+		Try.of(() -> { throw new Exception(); }).get();
 	}
 
 	@Test
 	public void getOrElseShouldReturnElseValueWhenCallableThrowsException() {
-		assertEquals("X", Try.of(() -> { throw  new Exception(); }).getOrElse("X"));
+		assertEquals("X", Try.of(() -> { throw new Exception(); }).getOrElse("X"));
 	}
 
 	@Test
 	public void getOrThrowShouldThrowExceptionWhenCallableThrowsException() throws Throwable {
 		exception.expect(IllegalAccessException.class);
-		Try.of(() -> { throw  new IllegalAccessException(); }).getOrThrow();
+		Try.of(() -> { throw new IllegalAccessException(); }).getOrThrow();
 	}
 
 	@Test
 	public void getOrThrowWithValueShouldThrowExceptionWhenCallableThrowsException() throws Throwable {
 		exception.expect(IllegalAccessException.class);
-		Try.of(() -> { throw  new IllegalAccessException(); }).getOrThrow("X");
+		Try.of(() -> { throw new IllegalAccessException(); }).getOrThrow("X");
 	}
 
 	@Test
 	public void isPresentShouldReturnFalseWhenCallableThrowsException() throws Throwable {
-		assertFalse(Try.of(() -> { throw  new Exception(); }).isPresent());
+		assertFalse(Try.of(() -> { throw new Exception(); }).isPresent());
 	}
 
 	@Test
 	public void ifPresentWithConsumerShouldNotCallConsumerWhenCallableThrowsException() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.of(() -> { throw  new Exception(); }).ifPresent(consumer);
+		Try.of(() -> { throw new Exception(); }).ifPresent(consumer);
 		verify(consumer, times(0)).accept(any());
 	}
 
@@ -318,33 +320,33 @@ public class CallableTest {
 		exception.expect(Exception.class);
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.of(() -> { throw  new Exception(); }).ifPresentOrThrow(consumer);
+		Try.of(() -> { throw new Exception(); }).ifPresentOrThrow(consumer);
 	}
 
 	@Test
 	public void ifFailureShouldCallConsumerWhenCallableThrowsException() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Consumer<Throwable> consumer = mock(Consumer.class);
-		Try.of(() -> { throw  new Exception(); }).ifFailure(consumer);
+		Try.of(() -> { throw new Exception(); }).ifFailure(consumer);
 		verify(consumer, times(1)).accept(any());
 	}
 
 	@Test
 	public void throwExceptionShouldThrowExceptionWhenCallableThrowsException() throws Throwable {
 		exception.expect(Exception.class);
-		Try.of(() -> { throw  new Exception(); }).throwException();
+		Try.of(() -> { throw new Exception(); }).throwException();
 	}
 
 	@Test
 	public void valueShouldReturnEmptyOptionalWhenCallableThrowsException() throws Throwable {
-		assertFalse(Try.of(() -> { throw  new Exception(); }).value().isPresent());
+		assertFalse(Try.of(() -> { throw new Exception(); }).value().isPresent());
 	}
 
 	@Test
 	public void mapShouldNotCallFunctionWhenCallableThrowsException() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Function<Object, Object> function = mock(Function.class);
-		Try.of(() -> { throw  new Exception(); }).map(function);
+		Try.of(() -> { throw new Exception(); }).map(function);
 		verify(function, times(0)).apply(any());
 	}
 
@@ -352,7 +354,7 @@ public class CallableTest {
 	public void flatMapShouldNotCallFunctionWhenCallableThrowsException() throws Throwable {
 		@SuppressWarnings("unchecked")
 		Function<Object, Try<Object, Throwable>> function = mock(Function.class);
-		Try.of(() -> { throw  new Exception(); }).flatMap(function);
+		Try.of(() -> { throw new Exception(); }).flatMap(function);
 		verify(function, times(0)).apply(any());
 	}
 
@@ -360,7 +362,7 @@ public class CallableTest {
 	public void onSuccessShouldNotCallConsumerWhenCallableThrowsException() {
 		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
-		Try.of(() -> { throw  new Exception(); }).onSuccess(consumer);
+		Try.of(() -> { throw new Exception(); }).onSuccess(consumer);
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
@@ -368,7 +370,7 @@ public class CallableTest {
 	public void onFailureShouldCallConsumerWhenCallableThrowsException() {
 		@SuppressWarnings("unchecked")
 		Consumer<Throwable> consumer = mock(Consumer.class);
-		Try.of(() -> { throw  new Exception(); }).onFailure(consumer);
+		Try.of(() -> { throw new Exception(); }).onFailure(consumer).isFailure();
 		verify(consumer, times(1)).accept(anyObject());
 	}
 
@@ -388,7 +390,7 @@ public class CallableTest {
 	@Test
 	public void shouldCallSecondCallableWhenFirstCallableThrowsException() throws Exception {
 		Callable<Object> callable = mock(Callable.class);
-		Try.of(() -> { throw new Exception(); }).or(callable);
+		Try.of(() -> { throw new Exception(); }).or(callable).isPresent();
 		verify(callable, times(1)).call();
 	}
 
