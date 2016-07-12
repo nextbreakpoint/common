@@ -6,7 +6,7 @@
 	<version>2.0.0</version>
 	<packaging>jar</packaging>
 	<name>Try</name>
-	<description>Try implements a functional API for handling checked and unchecked exceptions</description>
+	<description>Try implements a monad for handling checked and unchecked exceptions</description>
 	<url>https://github.com/nextbreakpoint/try</url>
 	<licenses>
 		<license>
