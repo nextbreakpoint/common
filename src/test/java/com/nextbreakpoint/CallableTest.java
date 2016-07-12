@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
@@ -263,6 +264,56 @@ public class CallableTest {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.of(() -> "X").onFailure(consumer);
 		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
+	public void shouldCallFilterWhenCallableReturnsValue() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(true);
+		Try.of(() -> "X").filter(filter).get();
+		verify(filter, times(1)).test("X");
+	}
+
+	@Test
+	public void shouldNotReturnValueWhenFilterReturnsFalseAndCallableReturnsValue() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(false);
+		assertFalse(Try.of(() -> "X").filter(filter).isPresent());
+	}
+
+	@Test
+	public void shouldHaveValueWhenFilterReturnsTrueAndCallableReturnsValue() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertTrue(Try.of(() -> "X").map(v -> v.toLowerCase()).filter(filter).isPresent());
+	}
+
+	@Test
+	public void shouldNotHaveValueWhenFilterReturnsFalseBeforeMapAndCallableReturnsValue() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertFalse(Try.of(() -> "X").filter(filter).map(v -> v.toLowerCase()).isPresent());
+	}
+
+	@Test
+	public void shouldNotHaveValueWhenFilterReturnsFalseAfterMapAndCallableReturnsValue() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(true);
+		assertFalse(Try.of(() -> "X").map(v -> v.toLowerCase()).filter(filter).isPresent());
+	}
+
+	@Test
+	public void shouldReturnValueWhenFilterIsAfterMapAndCallableReturnsValue() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertEquals(Try.of(() -> "X").map(v -> v.toLowerCase()).filter(filter).get(), "x");
+	}
+
+	@Test
+	public void shouldReturnValueWhenFilterIsBeforeMapAndCallableReturnsValue() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(true);
+		assertEquals(Try.of(() -> "X").filter(filter).map(v -> v.toLowerCase()).get(), "x");
 	}
 
 	@Test

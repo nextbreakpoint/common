@@ -366,7 +366,7 @@ public abstract class Try<V, E extends Exception> {
 		
 		public Optional<V> value() {
 			notifyEvent();
-			return Optional.ofNullable(getValue(value));
+			return wrap(value);
 		}
 
 		public void throwException() throws E {
@@ -374,11 +374,11 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public <R> Try<R, E> map(Function<V, R> func) {
-			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> Optional.ofNullable(value).filter(filter).map(v -> func.apply(v)).orElse(null));
+			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> wrap(value).map(v -> func.apply(v)).orElse(null));
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
-			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> Optional.ofNullable(value).filter(filter).map(v -> func.apply(v)).orElseGet(() -> new TrySuccess<>(mapper, filter, onSuccessHandler, onFailureHandler, null)).getOrThrow(null));
+			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> wrap(value).map(v -> func.apply(v)).orElseGet(() -> new TrySuccess<>(mapper, filter, onSuccessHandler, onFailureHandler, null)).getOrThrow(null));
 		}
 
 		public Try<V, E> or(Callable<V> callable) {
@@ -405,12 +405,8 @@ public abstract class Try<V, E extends Exception> {
 			Optional.ofNullable(onSuccessHandler).ifPresent(consumer -> consumer.accept(value));
 		}
 
-		private V getValue(V value) {
-			if (filter.test(value)) {
-				return value;
-			} else {
-				return null;
-			}
+		private Optional<V> wrap(V value) {
+			return Optional.ofNullable(value).filter(filter);
 		}
 	}
 
@@ -472,15 +468,15 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public <R> Try<R, E> map(Function<V, R> func) {
-			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> Optional.ofNullable(getValue(callable)).filter(filter).map(v -> func.apply(v)).orElse(null));
+			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> call(callable).map(v -> func.apply(v)).orElse(null));
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
-			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> Optional.ofNullable(getValue(callable)).filter(filter).map(v -> func.apply(v)).orElseGet(() -> new TrySuccess<>(mapper, filter, onSuccessHandler, onFailureHandler, null)).getOrThrow(null));
+			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> call(callable).map(v -> func.apply(v)).orElseGet(() -> new TrySuccess<>(mapper, filter, onSuccessHandler, onFailureHandler, null)).getOrThrow(null));
 		}
 
-		public Try<V, E> or(Callable<V> callable) {
-			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> evaluate(this.callable, callable).getOrThrow(null));
+		public Try<V, E> or(Callable<V> orCallable) {
+			return new TryCallable<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, () -> evaluate(callable, orCallable).getOrThrow(null));
 		}
 
 		public Try<V, E> onSuccess(Consumer<Object> consumer) {
@@ -505,7 +501,7 @@ public abstract class Try<V, E extends Exception> {
 
 		private Try<V, E> evaluate(Callable<V> callable) {
 			try {
-				return new TrySuccess<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, getValue(callable));
+				return new TrySuccess<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, call(callable).orElse(null));
 			} catch (Exception e) {
 				return new TryFailure<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, mapper.apply(e));
 			}
@@ -513,19 +509,14 @@ public abstract class Try<V, E extends Exception> {
 
 		private Try<V, E> evaluate(Callable<V> callable, Callable<V> orCallable) {
 			try {
-				return new TrySuccess<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, getValue(callable));
+				return new TrySuccess<>(mapper, defaultFilter(), onSuccessHandler, onFailureHandler, call(callable).orElse(null));
 			} catch (Exception e) {
 				return evaluate(orCallable);
 			}
 		}
 
-		private V getValue(Callable<V> callable) throws Exception {
-			V value = callable.call();
-			if (filter.test(value)) {
-				return value;
-			} else {
-				return null;
-			}
+		private Optional<V> call(Callable<V> callable) throws Exception {
+			return Optional.ofNullable(callable.call()).filter(filter);
 		}
 	}
 }

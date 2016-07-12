@@ -301,6 +301,41 @@ public class SuccessTest {
 	}
 
 	@Test
+	public void shouldHaveValueWhenFilterReturnsTrueAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertTrue(Try.success("X").map(v -> v.toLowerCase()).filter(filter).isPresent());
+	}
+
+	@Test
+	public void shouldNotHaveValueWhenFilterReturnsFalseBeforeMapAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertFalse(Try.success("X").filter(filter).map(v -> v.toLowerCase()).isPresent());
+	}
+
+	@Test
+	public void shouldNotHaveValueWhenFilterReturnsFalseAfterMapAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(true);
+		assertFalse(Try.success("X").map(v -> v.toLowerCase()).filter(filter).isPresent());
+	}
+
+	@Test
+	public void shouldReturnValueWhenFilterIsAfterMapAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertEquals(Try.success("X").map(v -> v.toLowerCase()).filter(filter).get(), "x");
+	}
+
+	@Test
+	public void shouldReturnValueWhenFilterIsBeforeMapAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(true);
+		assertEquals(Try.success("X").filter(filter).map(v -> v.toLowerCase()).get(), "x");
+	}
+
+	@Test
 	public void shouldCallSuccessConsumerWhenValueIsNotNull() {
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try.success("X").onSuccess(consumer).isPresent();
