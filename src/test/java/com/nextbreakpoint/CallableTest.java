@@ -33,7 +33,7 @@ public class CallableTest {
 
 	@Test
 	public void shouldNotBeNullWhenCallableIsNotNullAndMapperIsNotNull() {
-		assertNotNull(Try.of(() -> "X").withMapper(e -> e));
+		assertNotNull(Try.of(() -> "X").mapper(e -> e));
 	}
 
 	@Test
@@ -43,7 +43,7 @@ public class CallableTest {
 
 	@Test
 	public void shouldNotBeNullWhenCallableReturnsNullAndMapperIsNotNull() {
-		assertNotNull(Try.of(() -> null).withMapper(e -> e));
+		assertNotNull(Try.of(() -> null).mapper(e -> e));
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class CallableTest {
 
 	@Test
 	public void shouldNotBeNullWhenCallableThrowsExceptionAndMapperIsNotNull() {
-		assertNotNull(Try.of(() -> { throw new Exception(); }).withMapper(e -> e));
+		assertNotNull(Try.of(() -> { throw new Exception(); }).mapper(e -> e));
 	}
 	
 	@Test
@@ -443,28 +443,28 @@ public class CallableTest {
 	@Test
 	public void shouldReturnIOExceptionWhenCallableThrowsIOException() {
 		Consumer<IOException> consumer = mock(Consumer.class);
-		Try.of(() -> { throw new IOException(); }).withMapper(testMapper()).ifFailure(consumer);
+		Try.of(() -> { throw new IOException(); }).mapper(testMapper()).ifFailure(consumer);
 		verify(consumer, times(1)).accept(any(IOException.class));
 	}
 
 	@Test
 	public void shouldThrowsIOException() throws IOException {
 		exception.expect(IOException.class);
-		Try.of(() -> { throw new IOException(); }).withMapper(testMapper()).throwException();
+		Try.of(() -> { throw new IOException(); }).mapper(testMapper()).throwException();
 	}
 
 	@Test
 	public void shouldThrowSameExceptionWhenCallableThrowsException() throws IOException {
 		IOException x = new IOException();
 		exception.expect(is(x));
-		Try.of(() -> { throw x; }).withMapper(testMapper()).throwException();
+		Try.of(() -> { throw x; }).mapper(testMapper()).throwException();
 	}
 
 	@Test
 	public void shouldThrowSameExceptionWithCauseWhenCallableThrowsException() throws IOException {
 		NullPointerException x = new NullPointerException();
 		exception.expectCause(is(x));
-		Try.of(() -> { throw x; }).withMapper(testMapper()).throwException();
+		Try.of(() -> { throw x; }).mapper(testMapper()).throwException();
 	}
 
 	private Function<Exception, IOException> testMapper() {

@@ -33,13 +33,13 @@ public class FailureTest {
 
 	@Test
 	public void shouldNotBeNullWhenExceptionIsNotNullAndMapperIsNotNull() {
-		assertNotNull(Try.failure(new Exception()).withMapper(e -> e));
+		assertNotNull(Try.failure(new Exception()).mapper(e -> e));
 	}
 
 	@Test
 	public void shouldThrowNullPointerExceptionWhenMapperIsNull() {
 		exception.expect(NullPointerException.class);
-		Try.failure(new Exception()).withMapper(null);
+		Try.failure(new Exception()).mapper(null);
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class FailureTest {
 	@Test
 	public void shouldThrowsIOException() throws IOException {
 		exception.expect(IOException.class);
-		Try.failure(new Exception()).withMapper(testMapper()).throwException();
+		Try.failure(new Exception()).mapper(testMapper()).throwException();
 	}
 
 	@Test

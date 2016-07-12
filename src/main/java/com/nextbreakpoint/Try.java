@@ -117,7 +117,7 @@ public abstract class Try<V, E extends Exception> {
 	public abstract Optional<V> value();
 
 	/**
-	 * Creates new instance with given mapping function.
+	 * Creates new instance mapper given mapping function.
 	 * @param func the function
 	 * @param <R> the result type
 	 * @return new instance
@@ -125,7 +125,7 @@ public abstract class Try<V, E extends Exception> {
 	public abstract <R> Try<R, E> map(Function<V, R> func);
 
 	/**
-	 * Creates new instance with given mapping function.
+	 * Creates new instance mapper given mapping function.
 	 * @param func the function
 	 * @param <R> the result type
 	 * @return new instance
@@ -133,43 +133,43 @@ public abstract class Try<V, E extends Exception> {
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
 	/**
-	 * Creates new instance with alternative callable.
+	 * Creates new instance mapper alternative callable.
 	 * @param callable the callable
 	 * @return new instance
 	 */
 	public abstract Try<V, E> or(Callable<V> callable);
 
 	/**
-	 * Creates new instance with given consumer of success event.
+	 * Creates new instance mapper given consumer of success event.
 	 * @param consumer the consumer
 	 * @return new instance
 	 */
 	public abstract Try<V, E> onSuccess(Consumer<Object> consumer);
 
 	/**
-	 * Creates new instance with given consumer of failure event.
+	 * Creates new instance mapper given consumer of failure event.
 	 * @param consumer the consumer
 	 * @return new instance
 	 */
 	public abstract Try<V, E> onFailure(Consumer<Exception> consumer);
 
     /**
-     * Creates new instance with given mapper.
+     * Creates new instance mapper given mapper.
      * @param mapper the mapper
 	 * @param <X> the type of exception
      * @return new instance
      */
-	public abstract <X extends Exception> Try<V, X> withMapper(Function<Exception, X> mapper);
+	public abstract <X extends Exception> Try<V, X> mapper(Function<Exception, X> mapper);
 
 	/**
-	 * Creates new instance with given filter.
+	 * Creates new instance mapper given filter.
 	 * @param filter the filter
 	 * @return new instance
 	 */
 	public abstract Try<V, E> filter(Predicate<Object> filter);
 
     /**
-     * Creates new instance with given callable.
+     * Creates new instance mapper given callable.
      * @param callable the callable
 	 * @param <R> the result type
      * @return new instance
@@ -179,7 +179,7 @@ public abstract class Try<V, E extends Exception> {
     }
 
 	/**
-     * Creates new instance with given exception.
+     * Creates new instance mapper given exception.
      * @param exception the exception
 	 * @param <R> the result type
      * @return new instance
@@ -189,7 +189,7 @@ public abstract class Try<V, E extends Exception> {
 	}
 
     /**
-     * Creates new instance with given value.
+     * Creates new instance mapper given value.
      * @param value the value
 	 * @param <R> the result type
      * @return new instance
@@ -302,7 +302,7 @@ public abstract class Try<V, E extends Exception> {
 			return new TryFailure<>(mapper, filter, onSuccess, consumer, exception);
 		}
 
-		public <X extends Exception> Try<V, X> withMapper(Function<Exception, X> mapper) {
+		public <X extends Exception> Try<V, X> mapper(Function<Exception, X> mapper) {
 			return new TryFailure<>(mapper, filter, onSuccess, onFailure, mapper.apply(exception));
 		}
 
@@ -393,7 +393,7 @@ public abstract class Try<V, E extends Exception> {
 			return new TrySuccess<>(mapper, filter, onSuccess, consumer, value);
 		}
 
-		public <X extends Exception> Try<V, X> withMapper(Function<Exception, X> mapper) {
+		public <X extends Exception> Try<V, X> mapper(Function<Exception, X> mapper) {
 			return new TrySuccess<>(mapper, filter, onSuccess, onFailure, value);
 		}
 
@@ -495,7 +495,7 @@ public abstract class Try<V, E extends Exception> {
 			return new TryCallable<>(mapper, filter, onSuccess, consumer, callable);
 		}
 
-		public <X extends Exception> Try<V, X> withMapper(Function<Exception, X> mapper) {
+		public <X extends Exception> Try<V, X> mapper(Function<Exception, X> mapper) {
 			return new TryCallable<>(mapper, filter, onSuccess, onFailure, callable);
 		}
 

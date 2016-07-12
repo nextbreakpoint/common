@@ -32,18 +32,18 @@ public class SuccessTest {
 
 	@Test
 	public void shouldNotBeNullWhenValueIsNullAndMapperIsNotNull() {
-		assertNotNull(Try.success(null).withMapper(e -> e));
+		assertNotNull(Try.success(null).mapper(e -> e));
 	}
 
 	@Test
 	public void shouldNotBeNullWhenValueIsNotNullAndMapperIsNotNull() {
-		assertNotNull(Try.success("X").withMapper(e -> e));
+		assertNotNull(Try.success("X").mapper(e -> e));
 	}
 
 	@Test
 	public void shouldThrowNullPointerExceptionWhenMapperIsNull() {
 		exception.expect(NullPointerException.class);
-		Try.success("X").withMapper(null);
+		Try.success("X").mapper(null);
 	}
 
 	@Test

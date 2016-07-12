@@ -1,10 +1,19 @@
 # Try 2.0.0
 
-Try implements a functional API for handling checked and unchecked exceptions.
-
-## Better exceptions handling 
+Try implements a monad for handling checked and unchecked exceptions.
 
 If you are familiar with Stream and Optional classes in Java 8, you will find Try very useful.
+
+    Version 2.x is not backward compatible with versions 1.x.
+
+Version 2.x introduces a new lazy execution, so the callable is executed only when one of the terminal operations is invoked.
+The terminal operations are represented by all not static methods which not return a subclass of Try.
+
+The interesting consequence of this behaviour is that you can execute multiple times the same callable.
+You can store any instance of Try and reuse it many times to perform the same operations.
+   
+
+## Better exceptions handling 
 
 A typical fragment of code for handling exceptions in Java looks like:
 
@@ -17,6 +26,19 @@ A typical fragment of code for handling exceptions in Java looks like:
 Using Try you can rewrite the same fragment of code in just one line:
 
     Try.of(() -> doSomething()).ifFailure(e -> handleException(e));
+
+
+## Getting values
+
+
+## Mapping and filtering
+
+
+## Remapping exceptions
+
+
+## Alternative executions
+
 
 ## Other examples
 
@@ -32,7 +54,7 @@ Given the program:
 
             Try.of(() -> serviceKO.doSomething()).ifFailure(TryMain::handleException);
 
-            Try.of(() -> serviceKO.doSomething()).withMapper(mapper()).ifFailure(TryMain::handleException);
+            Try.of(() -> serviceKO.doSomething()).mapper(mapper()).ifFailure(TryMain::handleException);
         }
 
         private static final Service serviceOK = new ServiceOK();

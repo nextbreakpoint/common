@@ -13,7 +13,7 @@ public class TryMain {
 
 		Try.of(() -> serviceKO.doSomething()).ifFailure(TryMain::handleException);
 
-		Try.of(() -> serviceKO.doSomething()).withMapper(mapper()).ifFailure(TryMain::handleException);
+		Try.of(() -> serviceKO.doSomething()).mapper(mapper()).ifFailure(TryMain::handleException);
 	}
 
 	private static final Service serviceOK = new ServiceOK();
