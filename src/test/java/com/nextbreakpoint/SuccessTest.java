@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.NoSuchElementException;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -136,6 +137,13 @@ public class SuccessTest {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.success(null).onFailure(consumer).getOrElse(null);
 		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
+	public void shouldNotCallSecondCallableWhenValueIsNull() throws Exception {
+		Callable<Object> callable = mock(Callable.class);
+		Try.success(null).or(callable).isPresent();
+		verify(callable, times(0)).call();
 	}
 
 	@Test
@@ -347,5 +355,12 @@ public class SuccessTest {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.success("X").onFailure(consumer);
 		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
+	public void shouldNotCallSecondCallableWhenValueIsNotNull() throws Exception {
+		Callable<String> callable = mock(Callable.class);
+		Try.success("X").or(callable).isPresent();
+		verify(callable, times(0)).call();
 	}
 }

@@ -6,8 +6,10 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -137,6 +139,34 @@ public class FailureTest {
 	public void shouldThrowsIOException() throws IOException {
 		exception.expect(IOException.class);
 		Try.failure(new Exception()).withMapper(testMapper()).throwException();
+	}
+
+	@Test
+	public void shouldCallSecondCallableWhenValueIsNull() throws Exception {
+		Callable<Object> callable = mock(Callable.class);
+		when(callable.call()).thenReturn("X");
+		Try.failure(new Exception()).or(callable).isFailure();
+		verify(callable, times(1)).call();
+	}
+
+	@Test
+	public void mapShouldNotCallFilter() {
+		Function<Object, Object> function = mock(Function.class);
+		Predicate<Object> filter = mock(Predicate.class);
+		when(function.apply("X")).thenReturn("Y");
+		when(filter.test("X")).thenReturn(true);
+		Try.failure(new Exception()).filter(filter).map(function).isFailure();
+		verify(filter, times(0)).test("X");
+	}
+
+	@Test
+	public void flatMapShouldNotCallFilter() {
+		Function<Object, Try<Object, Exception>> function = mock(Function.class);
+		Predicate<Object> filter = mock(Predicate.class);
+		when(function.apply("X")).thenReturn(Try.success("Y"));
+		when(filter.test("X")).thenReturn(true);
+		Try.failure(new Exception()).filter(filter).flatMap(function).isFailure();
+		verify(filter, times(0)).test("X");
 	}
 
 	private static Function<Exception, IOException> testMapper() {
