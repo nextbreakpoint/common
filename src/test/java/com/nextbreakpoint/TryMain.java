@@ -19,12 +19,12 @@ public class TryMain {
 	private static final Service serviceOK = new ServiceOK();
 	private static final Service serviceKO = new ServiceKO();
 
-	private static Function<Throwable, IOException> mapper() {
+	private static Function<Exception, IOException> mapper() {
 		return e -> (e instanceof IOException) ? (IOException)e : new IOException("IO Error", e);
 	}
 
-	private static void handleException(Throwable e) {
-		System.out.println("Throwable: " + e.getMessage());
+	private static void handleException(Exception e) {
+		System.out.println("Exception: " + e.getMessage());
 	}
 
 	private static void handleException(IOException e) {

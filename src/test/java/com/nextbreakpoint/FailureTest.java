@@ -42,63 +42,60 @@ public class FailureTest {
 
 	@Test
 	public void isFailureShouldReturnTrue() {
-		assertTrue(Try.failure(new Throwable()).isFailure());
+		assertTrue(Try.failure(new Exception()).isFailure());
 	}
 
 	@Test
 	public void getShouldThrowNoSuchElementException() {
 		exception.expect(NoSuchElementException.class);
-		Try.failure(new Throwable()).get();
+		Try.failure(new Exception()).get();
 	}
 
 	@Test
 	public void getOrElseShouldReturnDefaultValue() {
-		assertEquals("X", Try.failure(new Throwable()).getOrElse("X"));
+		assertEquals("X", Try.failure(new Exception()).getOrElse("X"));
 	}
 
 	@Test
-	public void getOrThrowShouldThrowException() throws Throwable {
+	public void getOrThrowShouldThrowException() throws Exception {
 		exception.expect(IllegalAccessException.class);
 		Try.failure(new IllegalAccessException()).getOrThrow();
 	}
 
 	@Test
-	public void getOrThrowWithDefaultValueShouldThrowException() throws Throwable {
+	public void getOrThrowWithDefaultValueShouldThrowException() throws Exception {
 		exception.expect(IllegalAccessException.class);
 		Try.failure(new IllegalAccessException()).getOrThrow("X");
 	}
 
 	@Test
-	public void isPresentShouldReturnFalse() throws Throwable {
+	public void isPresentShouldReturnFalse() throws Exception {
 		assertFalse(Try.failure(new Exception()).isPresent());
 	}
 
 	@Test
 	public void ifPresentWithConsumerShouldNotCallConsumer() {
-		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).ifPresent(consumer);
 		verify(consumer, times(0)).accept(any());
 	}
 
 	@Test
-	public void ifPresentOrThrowShouldThrowException() throws Throwable {
+	public void ifPresentOrThrowShouldThrowException() throws Exception {
 		exception.expect(Exception.class);
-		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).ifPresentOrThrow(consumer);
 	}
 
 	@Test
 	public void ifFailureShouldCallConsumer() {
-		@SuppressWarnings("unchecked")
-		Consumer<Throwable> consumer = mock(Consumer.class);
+		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).ifFailure(consumer);
 		verify(consumer, times(1)).accept(any());
 	}
 
 	@Test
-	public void throwExceptionShouldThrowException() throws Throwable {
+	public void throwExceptionShouldThrowException() throws Exception {
 		exception.expect(Exception.class);
 		Try.failure(new Exception()).throwException();
 	}
@@ -110,7 +107,6 @@ public class FailureTest {
 
 	@Test
 	public void mapShouldNotCallFunction() {
-		@SuppressWarnings("unchecked")
 		Function<Object, Object> function = mock(Function.class);
 		Try.failure(new Exception()).map(function).getOrElse(null);
 		verify(function, times(0)).apply(any());
@@ -118,15 +114,13 @@ public class FailureTest {
 
 	@Test
 	public void flatMapShouldNotCallFunction() {
-		@SuppressWarnings("unchecked")
-		Function<Object, Try<Object, Throwable>> function = mock(Function.class);
+		Function<Object, Try<Object, Exception>> function = mock(Function.class);
 		Try.failure(new Exception()).flatMap(function).getOrElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
 	public void shouldNotCallSuccessConsumer() {
-		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).onSuccess(consumer).getOrElse(null);
 		verify(consumer, times(0)).accept(anyObject());
@@ -134,8 +128,7 @@ public class FailureTest {
 
 	@Test
 	public void shouldCallFailureConsumer() {
-		@SuppressWarnings("unchecked")
-		Consumer<Throwable> consumer = mock(Consumer.class);
+		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).onFailure(consumer).getOrElse(null);
 		verify(consumer, times(1)).accept(anyObject());
 	}
@@ -146,7 +139,7 @@ public class FailureTest {
 		Try.failure(new Exception()).withMapper(testMapper()).throwException();
 	}
 
-	private static Function<Throwable, IOException> testMapper() {
+	private static Function<Exception, IOException> testMapper() {
 		return e -> (e instanceof IOException) ? (IOException)e : new IOException("IO Error", e);
 	}
 }
