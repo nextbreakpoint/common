@@ -44,7 +44,6 @@ Use isPresent or isFailure to check result:
     Try.of(() -> "X").isPresent(); // Returns true
     Try.of(() -> null).isPresent(); // Returns false
     Try.of(() -> { throw new Exception(); }).isFailure(); // Returns true
-    Try.of(() -> { throw new Exception(); }).isPresentOrThrow(); // Throws exception
 
 Use ifPresent() or ifFailure() to check result and execute code: 
 
@@ -52,6 +51,7 @@ Use ifPresent() or ifFailure() to check result and execute code:
     Try.of(() -> null).ifPresent(consumer); // Doesn't invoke the consumer
     Try.of(() -> { throw new Exception(); }).ifFailure(consumer); // Invokes the consumer
     Try.of(() -> { throw new Exception(); }).ifPresent(consumer); // Doesn't invoke the consumer
+    Try.of(() -> { throw new Exception(); }).ifPresentOrThrow(consumer); // Throws exception
 
 ## Receiving events
 
@@ -78,7 +78,7 @@ Use filter() to exclude a value:
 
 Use the mapper() to change type of exception:
 
-    Try.of(() -> { throw new Exception(x); }).mapper(mapper()).ifFailure(e -> handleException(e));
+    Try.of(() -> { throw new Exception(); }).mapper(mapper()).ifFailure(e -> handleException(e));
     
     private static void handleException(IOException e) {
         System.out.println("IOException: " + e.getMessage());
@@ -92,7 +92,7 @@ Use the mapper() to change type of exception:
 
 Use or() to provide an alternative callable:
 
-    Try.of(() -> { throw new Exception(x); }).or(() -> "X").get(); // Returns X    
+    Try.of(() -> { throw new Exception(); }).or(() -> "X").get(); // Returns X    
 
 ## Complete example
 
