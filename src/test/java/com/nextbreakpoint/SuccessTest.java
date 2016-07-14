@@ -52,6 +52,11 @@ public class SuccessTest {
 	}
 
 	@Test
+	public void isSuccessShouldReturnTrueWhenValueIsNull() {
+		assertTrue(Try.success(null).isSuccess());
+	}
+
+	@Test
 	public void getShouldThrowNoSuchElementExceptionWhenValueIsNull() {
 		exception.expect(NoSuchElementException.class);
 		Try.success(null).get();
@@ -97,6 +102,13 @@ public class SuccessTest {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.success(null).ifFailure(consumer);
 		verify(consumer, times(0)).accept(any());
+	}
+
+	@Test
+	public void ifSuccessShouldCallConsumerWhenValueIsNull() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.success(null).ifSuccess(consumer);
+		verify(consumer, times(1)).accept(any());
 	}
 
 	@Test
@@ -152,6 +164,11 @@ public class SuccessTest {
 	}
 
 	@Test
+	public void isSuccessShouldReturnTrueWhenValueIsNotNull() {
+		assertTrue(Try.success("X").isSuccess());
+	}
+
+	@Test
 	public void getShouldReturnValueWhenValueIsNotNull() {
 		assertEquals("X", Try.success("X").get());
 	}
@@ -195,6 +212,13 @@ public class SuccessTest {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.success("X").ifFailure(consumer);
 		verify(consumer, times(0)).accept(any());
+	}
+
+	@Test
+	public void ifSuccessShouldCallConsumerWhenValueIsNotNull() {
+		Consumer<Optional<String>> consumer = mock(Consumer.class);
+		Try.success("X").ifSuccess(consumer);
+		verify(consumer, times(1)).accept(any());
 	}
 
 	@Test

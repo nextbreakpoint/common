@@ -49,6 +49,11 @@ public class FailureTest {
 	}
 
 	@Test
+	public void isSuccessShouldReturnFalse() {
+		assertFalse(Try.failure(new Exception()).isSuccess());
+	}
+
+	@Test
 	public void getShouldThrowNoSuchElementException() {
 		exception.expect(NoSuchElementException.class);
 		Try.failure(new Exception()).get();
@@ -95,6 +100,13 @@ public class FailureTest {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).ifFailure(consumer);
 		verify(consumer, times(1)).accept(any());
+	}
+
+	@Test
+	public void ifSuccessShouldNotCallConsumer() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.failure(new Exception()).ifSuccess(consumer);
+		verify(consumer, times(0)).accept(any());
 	}
 
 	@Test

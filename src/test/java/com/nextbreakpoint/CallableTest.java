@@ -63,6 +63,11 @@ public class CallableTest {
 	}
 
 	@Test
+	public void isSuccessShouldReturnTrueWhenCallableReturnsNull() {
+		assertTrue(Try.of(() -> null).isSuccess());
+	}
+
+	@Test
 	public void getShouldThrowNoSuchElementExceptionWhenCallableReturnsNull() {
 		exception.expect(NoSuchElementException.class);
 		Try.of(() -> null).get();
@@ -111,6 +116,13 @@ public class CallableTest {
 	}
 
 	@Test
+	public void ifSuccessShouldCallConsumerWhenCallableReturnsNull() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.of(() -> null).ifSuccess(consumer);
+		verify(consumer, times(1)).accept(any());
+	}
+
+	@Test
 	public void throwExceptionShouldNotThrowExceptionWhenCallableReturnsNull() throws Exception {
 		Try.of(() -> null).throwIfFailure();
 	}
@@ -151,6 +163,11 @@ public class CallableTest {
 	@Test
 	public void isFailureShouldReturnFalseWhenCallableReturnsValue() {
 		assertFalse(Try.of(() -> "X").isFailure());
+	}
+
+	@Test
+	public void isSuccessShouldReturnTrueWhenCallableReturnsValue() {
+		assertTrue(Try.of(() -> "X").isSuccess());
 	}
 
 	@Test
@@ -197,6 +214,13 @@ public class CallableTest {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.of(() -> "X").ifFailure(consumer);
 		verify(consumer, times(0)).accept(any());
+	}
+
+	@Test
+	public void ifSuccessShouldCallConsumerWhenCallableReturnsValue() {
+		Consumer<Optional<String>> consumer = mock(Consumer.class);
+		Try.of(() -> "X").ifSuccess(consumer);
+		verify(consumer, times(1)).accept(any());
 	}
 
 	@Test
@@ -323,6 +347,11 @@ public class CallableTest {
 	}
 
 	@Test
+	public void isSuccessShouldReturnFalseWhenCallableThrowsException() {
+		assertFalse(Try.of(() -> { throw new Exception(); }).isSuccess());
+	}
+
+	@Test
 	public void getShouldThrowNoSuchElementExceptionWhenCallableThrowsException() {
 		exception.expect(NoSuchElementException.class);
 		Try.of(() -> { throw new Exception(); }).get();
@@ -369,6 +398,13 @@ public class CallableTest {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.of(() -> { throw new Exception(); }).ifFailure(consumer);
 		verify(consumer, times(1)).accept(any());
+	}
+
+	@Test
+	public void ifSuccessShouldNotCallConsumerWhenCallableThrowsException() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).ifSuccess(consumer);
+		verify(consumer, times(0)).accept(any());
 	}
 
 	@Test

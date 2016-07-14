@@ -50,25 +50,37 @@ public abstract class Try<V, E extends Exception> {
 	public abstract boolean isFailure();
 
 	/**
-	 * Checks value is present.
+	 * Returns true if no exception occurred.
+	 * @return true when exception if not present
+	 */
+	public abstract boolean isSuccess();
+
+	/**
+	 * Returns true if value is present.
 	 * @return true when value is present
 	 */
 	public abstract boolean isPresent();
 
 	/**
-	 * Consumes exception if present.
+	 * Invokes consumer if exception occurred.
 	 * @param consumer the consumer
 	 */
 	public abstract void ifFailure(Consumer<E> consumer);
 
 	/**
-	 * Consumes value if present.
+	 * Invokes consumer if no exception occurred.
+	 * @param consumer the consumer
+	 */
+	public abstract void ifSuccess(Consumer<Optional<V>> consumer);
+
+	/**
+	 * Invokes consumer if value is present.
 	 * @param consumer the consumer
 	 */
 	public abstract void ifPresent(Consumer<V> consumer);
 
 	/**
-	 * Consumes value if present or throws exception if failure.
+	 * Invokes consumer if value is present or throws exception if failure.
 	 * @param consumer the consumer
 	 * @throws E the exception
 	 */
@@ -233,6 +245,11 @@ public abstract class Try<V, E extends Exception> {
 			return true;
 		}
 
+		public boolean isSuccess() {
+			notifyEvent();
+			return false;
+		}
+
 		public boolean isPresent() {
 			notifyEvent();
 			return false;
@@ -241,6 +258,10 @@ public abstract class Try<V, E extends Exception> {
 		public void ifFailure(Consumer<E> consumer) {
 			notifyEvent();
 			consumer.accept(exception);
+		}
+
+		public void ifSuccess(Consumer<Optional<V>> consumer) {
+			notifyEvent();
 		}
 
 		public void ifPresent(Consumer<V> consumer) {
@@ -332,12 +353,21 @@ public abstract class Try<V, E extends Exception> {
 			return false;
 		}
 
+		public boolean isSuccess() {
+			notifyEvent();
+			return true;
+		}
+
 		public boolean isPresent() {
 			return value().isPresent();
 		}
 
 		public void ifFailure(Consumer<E> consumer) {
 			notifyEvent();
+		}
+
+		public void ifSuccess(Consumer<Optional<V>> consumer) {
+			consumer.accept(value());
 		}
 
 		public void ifPresent(Consumer<V> consumer) {
@@ -435,12 +465,20 @@ public abstract class Try<V, E extends Exception> {
 			return execute().isFailure();
 		}
 
+		public boolean isSuccess() {
+			return execute().isSuccess();
+		}
+
 		public boolean isPresent() {
 			return execute().isPresent();
 		}
 
 		public void ifFailure(Consumer<E> consumer) {
 			execute().ifFailure(consumer);
+		}
+
+		public void ifSuccess(Consumer<Optional<V>> consumer) {
+			execute().ifSuccess(consumer);
 		}
 
 		public void ifPresent(Consumer<V> consumer) {
@@ -483,11 +521,8 @@ public abstract class Try<V, E extends Exception> {
 			return create(() -> evaluate().map(func).orElseGet(() -> empty()).orThrow(null));
 		}
 
-		public <R> Try<R, E> orMap(Function<V, Try<R, E>> func) {
-		}
-
 		public Try<V, E> or(Callable<V> callable) {
-			return create(() -> Try.of(() -> evaluate()).orMap(() -> Try.of(callable)).orThrow(null));
+			return create(() -> callOrElse(callable));
 		}
 
 		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
@@ -519,7 +554,7 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		private Optional<V> evaluate(Callable<V> callable) throws Exception {
-			return Optional.ofNullable(callOrElse(callable)).filter(filter);
+			return Optional.ofNullable(call(callable)).filter(filter);
 		}
 
 		private <R> TrySuccess<R, E> empty() {
@@ -531,6 +566,10 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		private V call() throws Exception {
+			return call(callable);
+		}
+
+		private V call(Callable<V> callable) throws Exception {
 			return callable.call();
 		}
 
@@ -538,7 +577,7 @@ public abstract class Try<V, E extends Exception> {
 			try {
 				return call();
 			} catch (Exception e) {
-				return callable.call();
+				return call(callable);
 			}
 		}
 	}
