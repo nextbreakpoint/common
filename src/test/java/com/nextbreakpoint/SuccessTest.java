@@ -377,7 +377,7 @@ public class SuccessTest {
 	@Test
 	public void shouldNotCallFailureConsumerWhenValueIsNotNull() {
 		Consumer<Exception> consumer = mock(Consumer.class);
-		Try.success("X").onFailure(consumer);
+		Try.success("X").onFailure(consumer).isPresent();
 		verify(consumer, times(0)).accept(anyObject());
 	}
 

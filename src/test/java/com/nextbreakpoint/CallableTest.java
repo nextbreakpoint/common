@@ -280,14 +280,14 @@ public class CallableTest {
 	@Test
 	public void shouldCallSuccessConsumerWhenCallableReturnsValue() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
-		Try.of(() -> "X").onSuccess(consumer).get();
+		Try.of(() -> "X").onSuccess(consumer).isPresent();
 		verify(consumer, times(1)).accept(anyObject());
 	}
 
 	@Test
 	public void shouldNotCallFailureConsumerWhenCallableReturnsValue() {
 		Consumer<Exception> consumer = mock(Consumer.class);
-		Try.of(() -> "X").onFailure(consumer);
+		Try.of(() -> "X").onFailure(consumer).isPresent();
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
