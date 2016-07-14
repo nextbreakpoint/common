@@ -70,18 +70,18 @@ public class CallableTest {
 
 	@Test
 	public void getOrElseShouldReturnDefaultValueWhenCallableReturnsNull() {
-		assertEquals("X", Try.of(() -> null).getOrElse("X"));
+		assertEquals("X", Try.of(() -> null).orElse("X"));
 	}
 
 	@Test
 	public void getOrThrowShouldThrowNoSuchElementExceptionWhenCallableReturnsNull() throws Exception {
 		exception.expect(NoSuchElementException.class);
-		Try.of(() -> null).getOrThrow();
+		Try.of(() -> null).orThrow();
 	}
 
 	@Test
 	public void getOrThrowWithDefaultValueShouldReturnDefaultValueWhenCallableReturnsNull() throws Exception {
-		assertEquals("X", Try.of(() -> null).getOrThrow("X"));
+		assertEquals("X", Try.of(() -> null).orThrow("X"));
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class CallableTest {
 
 	@Test
 	public void throwExceptionShouldNotThrowExceptionWhenCallableReturnsNull() throws Exception {
-		Try.of(() -> null).throwException();
+		Try.of(() -> null).throwIfFailure();
 	}
 
 	@Test
@@ -123,28 +123,28 @@ public class CallableTest {
 	@Test
 	public void mapShouldNotCallFunctionWhenCallableReturnsNull() {
 		Function<Object, Object> function = mock(Function.class);
-		Try.of(() -> null).map(function).getOrElse(null);
+		Try.of(() -> null).map(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
 	public void flatMapShouldNotCallFunctionWhenCallableReturnsNull() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
-		Try.of(() -> null).flatMap(function).getOrElse(null);
+		Try.of(() -> null).flatMap(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
 	public void shouldCallSuccessConsumerWhenCallableReturnsNull() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
-		Try.of(() -> null).onSuccess(consumer).getOrElse(null);
+		Try.of(() -> null).onSuccess(consumer).orElse(null);
 		verify(consumer, times(1)).accept(anyObject());
 	}
 
 	@Test
 	public void shouldNotCallFailureConsumerWhenCallableReturnsNull() {
 		Consumer<Exception> consumer = mock(Consumer.class);
-		Try.of(() -> null).onFailure(consumer).getOrElse(null);
+		Try.of(() -> null).onFailure(consumer).orElse(null);
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
@@ -160,17 +160,17 @@ public class CallableTest {
 
 	@Test
 	public void getOrElseShouldReturnValueWhenCallableReturnsValue() {
-		assertEquals("X", Try.of(() -> "X").getOrElse("Y"));
+		assertEquals("X", Try.of(() -> "X").orElse("Y"));
 	}
 
 	@Test
 	public void getOrThrowShouldReturnValueWhenCallableReturnsValue() throws Exception {
-		assertEquals("X", Try.of(() -> "X").getOrThrow());
+		assertEquals("X", Try.of(() -> "X").orThrow());
 	}
 
 	@Test
 	public void getOrThrowWithDefaultValueShouldReturnValueWhenCallableReturnsValue() throws Exception {
-		assertEquals("X", Try.of(() -> "X").getOrThrow("Y"));
+		assertEquals("X", Try.of(() -> "X").orThrow("Y"));
 	}
 
 	@Test
@@ -201,7 +201,7 @@ public class CallableTest {
 
 	@Test
 	public void throwExceptionShouldNotThrowExceptionWhenCallableReturnsValue() throws Exception {
-		Try.of(() -> "X").throwException();
+		Try.of(() -> "X").throwIfFailure();
 	}
 
 	@Test
@@ -330,19 +330,19 @@ public class CallableTest {
 
 	@Test
 	public void getOrElseShouldReturnDefaultValueWhenCallableThrowsException() {
-		assertEquals("X", Try.of(() -> { throw new Exception(); }).getOrElse("X"));
+		assertEquals("X", Try.of(() -> { throw new Exception(); }).orElse("X"));
 	}
 
 	@Test
 	public void getOrThrowShouldThrowExceptionWhenCallableThrowsException() throws Exception {
 		exception.expect(IllegalAccessException.class);
-		Try.of(() -> { throw new IllegalAccessException(); }).getOrThrow();
+		Try.of(() -> { throw new IllegalAccessException(); }).orThrow();
 	}
 
 	@Test
 	public void getOrThrowWithDefaultValueShouldThrowExceptionWhenCallableThrowsException() throws Exception {
 		exception.expect(IllegalAccessException.class);
-		Try.of(() -> { throw new IllegalAccessException(); }).getOrThrow("X");
+		Try.of(() -> { throw new IllegalAccessException(); }).orThrow("X");
 	}
 
 	@Test
@@ -374,7 +374,7 @@ public class CallableTest {
 	@Test
 	public void throwExceptionShouldThrowExceptionWhenCallableThrowsException() throws Exception {
 		exception.expect(Exception.class);
-		Try.of(() -> { throw new Exception(); }).throwException();
+		Try.of(() -> { throw new Exception(); }).throwIfFailure();
 	}
 
 	@Test
@@ -385,14 +385,14 @@ public class CallableTest {
 	@Test
 	public void mapShouldNotCallFunctionWhenCallableThrowsException() {
 		Function<Object, Object> function = mock(Function.class);
-		Try.of(() -> { throw new Exception(); }).map(function).getOrElse(null);
+		Try.of(() -> { throw new Exception(); }).map(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
 	public void flatMapShouldNotCallFunctionWhenCallableThrowsException() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
-		Try.of(() -> { throw new Exception(); }).flatMap(function).getOrElse(null);
+		Try.of(() -> { throw new Exception(); }).flatMap(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
@@ -451,21 +451,21 @@ public class CallableTest {
 	@Test
 	public void shouldThrowsIOException() throws IOException {
 		exception.expect(IOException.class);
-		Try.of(() -> { throw new IOException(); }).mapper(testMapper()).throwException();
+		Try.of(() -> { throw new IOException(); }).mapper(testMapper()).throwIfFailure();
 	}
 
 	@Test
 	public void shouldThrowSameExceptionWhenCallableThrowsException() throws IOException {
 		IOException x = new IOException();
 		exception.expect(is(x));
-		Try.of(() -> { throw x; }).mapper(testMapper()).throwException();
+		Try.of(() -> { throw x; }).mapper(testMapper()).throwIfFailure();
 	}
 
 	@Test
 	public void shouldThrowSameExceptionWithCauseWhenCallableThrowsException() throws IOException {
 		NullPointerException x = new NullPointerException();
 		exception.expectCause(is(x));
-		Try.of(() -> { throw x; }).mapper(testMapper()).throwException();
+		Try.of(() -> { throw x; }).mapper(testMapper()).throwIfFailure();
 	}
 
 	private Function<Exception, IOException> testMapper() {

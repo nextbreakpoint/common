@@ -44,12 +44,6 @@ public abstract class Try<V, E extends Exception> {
 	protected final Consumer<Exception> onFailure;
 
 	/**
-	 * Throws exception if failure.
-	 * @throws E the exception
-	 */
-	public abstract void throwException() throws E;
-	
-	/**
 	 * Returns true if exception occurred.
 	 * @return true when exception if present 
 	 */
@@ -78,7 +72,7 @@ public abstract class Try<V, E extends Exception> {
 	 * @param consumer the consumer
 	 * @throws E the exception
 	 */
-	public abstract void ifPresentOrThrow(Consumer<V> consumer) throws E, E;
+	public abstract void ifPresentOrThrow(Consumer<V> consumer) throws E;
 
 	/**
 	 * Returns the value.
@@ -92,7 +86,7 @@ public abstract class Try<V, E extends Exception> {
 	 * @param value the default value
 	 * @return the value
 	 */
-	public abstract V getOrElse(V value);
+	public abstract V orElse(V value);
 	
 	/**
 	 * Returns the value if present or throws exception if failure.
@@ -100,7 +94,7 @@ public abstract class Try<V, E extends Exception> {
 	 * @return the value
 	 * @throws E the exception
 	 */
-	public abstract V getOrThrow() throws E;
+	public abstract V orThrow() throws E;
 
 	/**
 	 * Returns the value if present or throws exception if failure or returns the default value.
@@ -108,13 +102,19 @@ public abstract class Try<V, E extends Exception> {
 	 * @return the value
 	 * @throws E the exception
 	 */
-	public abstract V getOrThrow(V value) throws E;
+	public abstract V orThrow(V value) throws E;
 
 	/**
 	 * Returns optional of value.
 	 * @return new optional
 	 */
 	public abstract Optional<V> value();
+
+	/**
+	 * Throws exception if failure.
+	 * @throws E the exception
+	 */
+	public abstract void throwIfFailure() throws E;
 
 	/**
 	 * Creates new instance mapper given mapping function.
@@ -257,17 +257,17 @@ public abstract class Try<V, E extends Exception> {
 			throw new NoSuchElementException("Failure doesn't have any value");
 		}
 
-		public V getOrElse(V value) {
+		public V orElse(V value) {
 			notifyEvent();
 			return value;
 		}
 
-		public V getOrThrow() throws E {
+		public V orThrow() throws E {
 			notifyEvent();
 			throw exception;
 	    }
 		
-		public V getOrThrow(V value) throws E {
+		public V orThrow(V value) throws E {
 			notifyEvent();
 			throw exception;
 	    }
@@ -277,7 +277,7 @@ public abstract class Try<V, E extends Exception> {
 			return Optional.empty();
 		}
 
-		public void throwException() throws E {
+		public void throwIfFailure() throws E {
 			notifyEvent();
 			throw exception;
 		}
@@ -352,15 +352,15 @@ public abstract class Try<V, E extends Exception> {
 			return value().get();
 		}
 
-		public V getOrElse(V value) {
+		public V orElse(V value) {
 			return value().orElse(value);
 		}
 
-		public V getOrThrow() throws E {
+		public V orThrow() throws E {
 	        return value().get();
 	    }
 
-		public V getOrThrow(V value) throws E {
+		public V orThrow(V value) throws E {
 	        return value().orElse(value);
 	    }
 		
@@ -369,7 +369,7 @@ public abstract class Try<V, E extends Exception> {
 			return evaluate();
 		}
 
-		public void throwException() throws E {
+		public void throwIfFailure() throws E {
 			notifyEvent();
 		}
 
@@ -378,7 +378,7 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
-			return create(() -> evaluate().map(func).orElseGet(() -> empty()).getOrThrow(null));
+			return create(() -> evaluate().map(func).orElseGet(() -> empty()).orThrow(null));
 		}
 
 		public Try<V, E> or(Callable<V> callable) {
@@ -455,24 +455,24 @@ public abstract class Try<V, E extends Exception> {
 			return execute().get();
 		}
 
-		public V getOrElse(V value) {
-			return execute().getOrElse(value);
+		public V orElse(V value) {
+			return execute().orElse(value);
 		}
 
-		public V getOrThrow() throws E {
-			return execute().getOrThrow();
+		public V orThrow() throws E {
+			return execute().orThrow();
 		}
 
-		public V getOrThrow(V value) throws E {
-			return execute().getOrThrow(value);
+		public V orThrow(V value) throws E {
+			return execute().orThrow(value);
 		}
 
 		public Optional<V> value() {
 			return execute().value();
 		}
 
-		public void throwException() throws E {
-			execute().throwException();
+		public void throwIfFailure() throws E {
+			execute().throwIfFailure();
 		}
 
 		public <R> Try<R, E> map(Function<V, R> func) {
@@ -480,11 +480,14 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
-			return create(() -> evaluate().map(func).orElseGet(() -> empty()).getOrThrow(null));
+			return create(() -> evaluate().map(func).orElseGet(() -> empty()).orThrow(null));
+		}
+
+		public <R> Try<R, E> orMap(Function<V, Try<R, E>> func) {
 		}
 
 		public Try<V, E> or(Callable<V> callable) {
-			return create(() -> evaluate(callable).orElse(null));
+			return create(() -> Try.of(() -> evaluate()).orMap(() -> Try.of(callable)).orThrow(null));
 		}
 
 		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
@@ -512,7 +515,7 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		private Optional<V> evaluate() throws Exception {
-			return Optional.ofNullable(call()).filter(filter);
+			return evaluate(callable);
 		}
 
 		private Optional<V> evaluate(Callable<V> callable) throws Exception {

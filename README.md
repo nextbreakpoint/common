@@ -32,23 +32,23 @@ The previous code uses two lambdas to implement a callable and a consumer:
 
 ## Getting values
 
-Use get() or getOrElse() to get the value returned by a callable: 
+Use get() or orElse() to get the value returned by a callable: 
 
     Try.of(() -> "X").get(); // Returns X
-    Try.of(() -> "X").getOrElse("Y"); // Returns X
+    Try.of(() -> "X").orElse("Y"); // Returns X
     Try.of(() -> null).get(); // Throws NoSuchElementException
-    Try.of(() -> null).getOrElse("Y"); // Returns Y
+    Try.of(() -> null).orElse("Y"); // Returns Y
     Try.of(() -> { throw new IOException(); }).get(); // Throws NoSuchElementException
-    Try.of(() -> { throw new IOException(); }).getOrElse("Y"); // Returns Y
+    Try.of(() -> { throw new IOException(); }).orElse("Y"); // Returns Y
 
-Use getOrThrow() to get the value or re-throw the exception: 
+Use orThrow() to get the value or re-throw the exception: 
 
-    Try.of(() -> "X").getOrThrow(); // Returns X
-    Try.of(() -> "X").getOrThrow("Y"); // Returns X
-    Try.of(() -> null).getOrThrow(); // Throws NoSuchElementException
-    Try.of(() -> null).getOrThrow("Y"); // Returns Y
-    Try.of(() -> { throw new IOException(); }).getOrThrow(); // Throws IOException
-    Try.of(() -> { throw new IOException(); }).getOrThrow("Y"); // Throws IOException
+    Try.of(() -> "X").orThrow(); // Returns X
+    Try.of(() -> "X").orThrow("Y"); // Returns X
+    Try.of(() -> null).orThrow(); // Throws NoSuchElementException
+    Try.of(() -> null).orThrow("Y"); // Returns Y
+    Try.of(() -> { throw new IOException(); }).orThrow(); // Throws IOException
+    Try.of(() -> { throw new IOException(); }).orThrow("Y"); // Throws IOException
 
 ## Checking values
 
@@ -78,11 +78,11 @@ Use ifPresent(), ifPresentOrThrow() or ifFailure() to conditionally execute code
 Use onSuccess() and onFailure() to receive events:
   
     Try.of(() -> "X").onSuccess(consumer).get(); // Invokes the consumer
-    Try.of(() -> null).onSuccess(consumer).getOrElse(null); // Invokes the consumer
-    Try.of(() -> { throw new Exception(); }).onSuccess(consumer).getOrElse(null); // Doesn't invoke the consumer
+    Try.of(() -> null).onSuccess(consumer).orElse(null); // Invokes the consumer
+    Try.of(() -> { throw new Exception(); }).onSuccess(consumer).orElse(null); // Doesn't invoke the consumer
     Try.of(() -> "X").onFailure(consumer).get(); // Doesn't invoke the consumer
-    Try.of(() -> null).onFailure(consumer).getOrElse(null); // Doesn't invoke the consumer
-    Try.of(() -> { throw new Exception(); }).onFailure(consumer).getOrElse(null); // Invokes the consumer
+    Try.of(() -> null).onFailure(consumer).orElse(null); // Doesn't invoke the consumer
+    Try.of(() -> { throw new Exception(); }).onFailure(consumer).orElse(null); // Invokes the consumer
 
 ## Mapping and filtering values
 

@@ -56,19 +56,19 @@ public class FailureTest {
 
 	@Test
 	public void getOrElseShouldReturnDefaultValue() {
-		assertEquals("X", Try.failure(new Exception()).getOrElse("X"));
+		assertEquals("X", Try.failure(new Exception()).orElse("X"));
 	}
 
 	@Test
 	public void getOrThrowShouldThrowException() throws Exception {
 		exception.expect(IllegalAccessException.class);
-		Try.failure(new IllegalAccessException()).getOrThrow();
+		Try.failure(new IllegalAccessException()).orThrow();
 	}
 
 	@Test
 	public void getOrThrowWithDefaultValueShouldThrowException() throws Exception {
 		exception.expect(IllegalAccessException.class);
-		Try.failure(new IllegalAccessException()).getOrThrow("X");
+		Try.failure(new IllegalAccessException()).orThrow("X");
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class FailureTest {
 	@Test
 	public void throwExceptionShouldThrowException() throws Exception {
 		exception.expect(Exception.class);
-		Try.failure(new Exception()).throwException();
+		Try.failure(new Exception()).throwIfFailure();
 	}
 
 	@Test
@@ -111,35 +111,35 @@ public class FailureTest {
 	@Test
 	public void mapShouldNotCallFunction() {
 		Function<Object, Object> function = mock(Function.class);
-		Try.failure(new Exception()).map(function).getOrElse(null);
+		Try.failure(new Exception()).map(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
 	public void flatMapShouldNotCallFunction() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
-		Try.failure(new Exception()).flatMap(function).getOrElse(null);
+		Try.failure(new Exception()).flatMap(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
 	public void shouldNotCallSuccessConsumer() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
-		Try.failure(new Exception()).onSuccess(consumer).getOrElse(null);
+		Try.failure(new Exception()).onSuccess(consumer).orElse(null);
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
 	@Test
 	public void shouldCallFailureConsumer() {
 		Consumer<Exception> consumer = mock(Consumer.class);
-		Try.failure(new Exception()).onFailure(consumer).getOrElse(null);
+		Try.failure(new Exception()).onFailure(consumer).orElse(null);
 		verify(consumer, times(1)).accept(anyObject());
 	}
 
 	@Test
 	public void shouldThrowsIOException() throws IOException {
 		exception.expect(IOException.class);
-		Try.failure(new Exception()).mapper(testMapper()).throwException();
+		Try.failure(new Exception()).mapper(testMapper()).throwIfFailure();
 	}
 
 	@Test

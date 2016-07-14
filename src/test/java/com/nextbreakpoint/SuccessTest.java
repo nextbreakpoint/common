@@ -14,7 +14,6 @@ import java.util.function.Predicate;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class SuccessTest {
@@ -60,18 +59,18 @@ public class SuccessTest {
 
 	@Test
 	public void getOrElseShouldReturnGivenDefaultWhenValueIsNull() {
-		assertEquals("X", Try.success(null).getOrElse("X"));
+		assertEquals("X", Try.success(null).orElse("X"));
 	}
 
 	@Test
 	public void getOrThrowShouldThrowNoSuchElementExceptionWhenValueIsNull() throws Exception {
 		exception.expect(NoSuchElementException.class);
-		Try.success(null).getOrThrow();
+		Try.success(null).orThrow();
 	}
 
 	@Test
 	public void getOrThrowWithDefaultValueShouldReturnDefaultValueWhenValueIsNull() throws Exception {
-		assertEquals("X", Try.success(null).getOrThrow("X"));
+		assertEquals("X", Try.success(null).orThrow("X"));
 	}
 
 	@Test
@@ -102,7 +101,7 @@ public class SuccessTest {
 
 	@Test
 	public void throwExceptionShouldNotThrowExceptionWhenValueIsNull() throws Exception {
-		Try.success(null).throwException();
+		Try.success(null).throwIfFailure();
 	}
 
 	@Test
@@ -114,7 +113,7 @@ public class SuccessTest {
 	public void mapShouldNotCallFunctionWhenValueIsNull() {
 		Function<Object, Object> function = mock(Function.class);
 		when(function.apply(null)).thenReturn("Y");
-		Try.success(null).map(function).getOrElse(null);
+		Try.success(null).map(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
@@ -122,21 +121,21 @@ public class SuccessTest {
 	public void flatMapShouldNotCallFunctionWhenValueIsNull() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply(null)).thenReturn(Try.success("Y"));
-		Try.success(null).flatMap(function).getOrElse(null);
+		Try.success(null).flatMap(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
 	public void shouldCallSuccessConsumerWhenValueIsNull() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
-		Try.success(null).onSuccess(consumer).getOrElse(null);
+		Try.success(null).onSuccess(consumer).orElse(null);
 		verify(consumer, times(1)).accept(anyObject());
 	}
 
 	@Test
 	public void shouldNotCallFailureConsumerWhenValueIsNull() {
 		Consumer<Exception> consumer = mock(Consumer.class);
-		Try.success(null).onFailure(consumer).getOrElse(null);
+		Try.success(null).onFailure(consumer).orElse(null);
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
@@ -159,17 +158,17 @@ public class SuccessTest {
 
 	@Test
 	public void getOrElseShouldReturnValueWhenValueIsNotNull() {
-		assertEquals("X", Try.success("X").getOrElse("Y"));
+		assertEquals("X", Try.success("X").orElse("Y"));
 	}
 
 	@Test
 	public void getOrThrowShouldReturnValueWhenValueIsNotNull() throws Exception {
-		assertEquals("X", Try.success("X").getOrThrow());
+		assertEquals("X", Try.success("X").orThrow());
 	}
 
 	@Test
 	public void getOrThrowWithDefaultValueShouldReturnValueWhenValueIsNotNull() throws Exception {
-		assertEquals("X", Try.success("X").getOrThrow("Y"));
+		assertEquals("X", Try.success("X").orThrow("Y"));
 	}
 
 	@Test
@@ -200,7 +199,7 @@ public class SuccessTest {
 
 	@Test
 	public void throwExceptionShouldNotThrowExceptionWhenValueIsNotNull() throws Exception {
-		Try.success("X").throwException();
+		Try.success("X").throwIfFailure();
 	}
 
 	@Test
