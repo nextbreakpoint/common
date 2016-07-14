@@ -6,6 +6,7 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -123,7 +124,7 @@ public class FailureTest {
 
 	@Test
 	public void shouldNotCallSuccessConsumer() {
-		Consumer<Object> consumer = mock(Consumer.class);
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).onSuccess(consumer).getOrElse(null);
 		verify(consumer, times(0)).accept(anyObject());
 	}

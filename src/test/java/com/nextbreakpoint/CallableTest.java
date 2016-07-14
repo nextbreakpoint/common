@@ -6,6 +6,7 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -135,7 +136,7 @@ public class CallableTest {
 
 	@Test
 	public void shouldCallSuccessConsumerWhenCallableReturnsNull() {
-		Consumer<Object> consumer = mock(Consumer.class);
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.of(() -> null).onSuccess(consumer).getOrElse(null);
 		verify(consumer, times(1)).accept(anyObject());
 	}
@@ -254,9 +255,9 @@ public class CallableTest {
 
 	@Test
 	public void shouldCallSuccessConsumerWhenCallableReturnsValue() {
-		Consumer<Object> consumer = mock(Consumer.class);
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.of(() -> "X").onSuccess(consumer).get();
-		verify(consumer, times(1)).accept(anyString());
+		verify(consumer, times(1)).accept(anyObject());
 	}
 
 	@Test
@@ -397,7 +398,7 @@ public class CallableTest {
 
 	@Test
 	public void shouldNotCallSuccessConsumerWhenCallableThrowsException() {
-		Consumer<Object> consumer = mock(Consumer.class);
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.of(() -> { throw new Exception(); }).onSuccess(consumer).isFailure();
 		verify(consumer, times(0)).accept(anyObject());
 	}

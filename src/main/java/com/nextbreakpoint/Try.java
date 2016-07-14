@@ -36,7 +36,7 @@ public abstract class Try<V, E extends Exception> {
 	/**
 	 * The handler to call when result is success.
 	 */
-	protected final Consumer<Object> onSuccess;
+	protected final Consumer<Optional<Object>> onSuccess;
 
 	/**
 	 * The handler to call when result is failure.
@@ -144,7 +144,7 @@ public abstract class Try<V, E extends Exception> {
 	 * @param consumer the consumer
 	 * @return new instance
 	 */
-	public abstract Try<V, E> onSuccess(Consumer<Object> consumer);
+	public abstract Try<V, E> onSuccess(Consumer<Optional<Object>> consumer);
 
 	/**
 	 * Creates new instance with given consumer of failure event.
@@ -198,7 +198,7 @@ public abstract class Try<V, E extends Exception> {
 		return new TrySuccess<>(defaultMapper(), defaultFilter(), value);
 	}
 
-	private Try(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Object> onSuccess, Consumer<Exception> onFailure) {
+	private Try(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccess, Consumer<Exception> onFailure) {
 		Objects.requireNonNull(mapper);
 		Objects.requireNonNull(filter);
 		this.mapper = mapper;
@@ -218,7 +218,7 @@ public abstract class Try<V, E extends Exception> {
 	private static class TryFailure<V, E extends Exception> extends Try<V, E> {
 		private final E exception;
 
-		public TryFailure(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Object> onSuccessHandler, Consumer<Exception> onFailureHandler, E exception) {
+		public TryFailure(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccessHandler, Consumer<Exception> onFailureHandler, E exception) {
 			super(mapper, filter, onSuccessHandler, onFailureHandler);
 			Objects.requireNonNull(exception);
 			this.exception = exception;
@@ -294,7 +294,7 @@ public abstract class Try<V, E extends Exception> {
 			return new TryCallable<>(mapper, defaultFilter(), onSuccess, onFailure, callable);
 		}
 
-		public Try<V, E> onSuccess(Consumer<Object> consumer) {
+		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
 			return new TryFailure<>(mapper, filter, consumer, onFailure, exception);
 		}
 
@@ -318,7 +318,7 @@ public abstract class Try<V, E extends Exception> {
 	private static class TrySuccess<V, E extends Exception> extends Try<V, E> {
 		private final V value;
 
-		public TrySuccess(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Object> onSuccessHandler, Consumer<Exception> onFailureHandler, V value) {
+		public TrySuccess(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccessHandler, Consumer<Exception> onFailureHandler, V value) {
 			super(mapper, filter, onSuccessHandler, onFailureHandler);
 			this.value = value;
 		}
@@ -385,7 +385,7 @@ public abstract class Try<V, E extends Exception> {
 			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, value);
 		}
 
-		public Try<V, E> onSuccess(Consumer<Object> consumer) {
+		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
 			return new TrySuccess<>(mapper, filter, consumer, onFailure, value);
 		}
 
@@ -414,14 +414,14 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		private void notifyEvent() {
-			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(value));
+			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value)));
 		}
 	}
 
 	private static class TryCallable<V, E extends Exception> extends Try<V, E> {
 		private final Callable<V> callable;
 
-		public TryCallable(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Object> onSuccessHandler, Consumer<Exception> onFailureHandler, Callable<V> callable) {
+		public TryCallable(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccessHandler, Consumer<Exception> onFailureHandler, Callable<V> callable) {
 			super(mapper, filter, onSuccessHandler, onFailureHandler);
 			Objects.requireNonNull(callable);
 			this.callable = callable;
@@ -487,7 +487,7 @@ public abstract class Try<V, E extends Exception> {
 			return create(() -> evaluate(callable).orElse(null));
 		}
 
-		public Try<V, E> onSuccess(Consumer<Object> consumer) {
+		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
 			return new TryCallable<>(mapper, filter, consumer, onFailure, callable);
 		}
 

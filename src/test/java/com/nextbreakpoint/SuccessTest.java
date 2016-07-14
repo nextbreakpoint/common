@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -127,7 +128,7 @@ public class SuccessTest {
 
 	@Test
 	public void shouldCallSuccessConsumerWhenValueIsNull() {
-		Consumer<Object> consumer = mock(Consumer.class);
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.success(null).onSuccess(consumer).getOrElse(null);
 		verify(consumer, times(1)).accept(anyObject());
 	}
@@ -345,9 +346,9 @@ public class SuccessTest {
 
 	@Test
 	public void shouldCallSuccessConsumerWhenValueIsNotNull() {
-		Consumer<Object> consumer = mock(Consumer.class);
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.success("X").onSuccess(consumer).isPresent();
-		verify(consumer, times(1)).accept(anyString());
+		verify(consumer, times(1)).accept(anyObject());
 	}
 
 	@Test
