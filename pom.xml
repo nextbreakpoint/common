@@ -211,7 +211,7 @@
 							<oauthConsumerSecret>${consumerSecret}</oauthConsumerSecret>
 							<oauthAccessToken>${accessToken}</oauthAccessToken>
 							<oauthAccessTokenSecret>${accessTokenSecret}</oauthAccessTokenSecret>
-							<status>Version ${project.version} of ${project.name} has been released! Grab it from Maven Central, Bintray or GitHub! ${project.url}</status>
+							<status>Version ${project.version} of ${project.name} has been released! Grab it from #Maven Central, #Bintray or #GitHub! ${project.url}</status>
 						</configuration>
 					</plugin>
 				</plugins>

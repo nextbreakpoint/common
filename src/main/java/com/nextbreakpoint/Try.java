@@ -24,12 +24,12 @@ import java.util.function.Predicate;
  */
 public abstract class Try<V, E extends Exception> {
     /**
-     * The function to transform an exception into the expected exception.
+     * The function to transform an exception into expected exception.
      */
     protected final Function<Exception, E> mapper;
 
 	/**
-	 * The filter to apply when mapping values.
+	 * The filter to apply when getting or mapping value.
 	 */
 	protected final Predicate<Object> filter;
 
@@ -44,8 +44,8 @@ public abstract class Try<V, E extends Exception> {
 	protected final Consumer<Exception> onFailure;
 
 	/**
-	 * Throws exception if present.
-	 * @throws E the captured exception
+	 * Throws exception if failure.
+	 * @throws E the exception
 	 */
 	public abstract void throwException() throws E;
 	
@@ -74,28 +74,28 @@ public abstract class Try<V, E extends Exception> {
 	public abstract void ifPresent(Consumer<V> consumer);
 
 	/**
-	 * Consumes value if present or throws exception if present.
+	 * Consumes value if present or throws exception if failure.
 	 * @param consumer the consumer
 	 * @throws E the exception
 	 */
 	public abstract void ifPresentOrThrow(Consumer<V> consumer) throws E, E;
 
 	/**
-	 * Returns the current value. 
+	 * Returns the value.
 	 * Throws NoSuchElementException if value not present.
 	 * @return the value
 	 */
 	public abstract V get();
 
 	/**
-	 * Returns the current value if present or returns a default value.
+	 * Returns the value if present or returns the default value.
 	 * @param value the default value
 	 * @return the value
 	 */
 	public abstract V getOrElse(V value);
 	
 	/**
-	 * Returns the current value if present or throws exception if present.
+	 * Returns the value if present or throws exception if failure.
 	 * Throws NoSuchElementException if value not present.
 	 * @return the value
 	 * @throws E the exception
@@ -103,7 +103,7 @@ public abstract class Try<V, E extends Exception> {
 	public abstract V getOrThrow() throws E;
 
 	/**
-	 * Returns the current value if present or throws exception if present or returns a default value.
+	 * Returns the value if present or throws exception if failure or returns the default value.
 	 * @param value the default value
 	 * @return the value
 	 * @throws E the exception
@@ -111,15 +111,15 @@ public abstract class Try<V, E extends Exception> {
 	public abstract V getOrThrow(V value) throws E;
 
 	/**
-	 * Returns optional of current value.
-	 * @return the optional
+	 * Returns optional of value.
+	 * @return new optional
 	 */
 	public abstract Optional<V> value();
 
 	/**
 	 * Creates new instance mapper given mapping function.
 	 * @param func the function
-	 * @param <R> the result type
+	 * @param <R> the result's value type
 	 * @return new instance
 	 */
 	public abstract <R> Try<R, E> map(Function<V, R> func);
@@ -127,51 +127,51 @@ public abstract class Try<V, E extends Exception> {
 	/**
 	 * Creates new instance mapper given mapping function.
 	 * @param func the function
-	 * @param <R> the result type
+	 * @param <R> the result's value type
 	 * @return new instance
 	 */
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
 	/**
-	 * Creates new instance mapper alternative callable.
+	 * Creates new instance with alternative callable to use if failure.
 	 * @param callable the callable
 	 * @return new instance
 	 */
 	public abstract Try<V, E> or(Callable<V> callable);
 
 	/**
-	 * Creates new instance mapper given consumer of success event.
+	 * Creates new instance with given consumer of success event.
 	 * @param consumer the consumer
 	 * @return new instance
 	 */
 	public abstract Try<V, E> onSuccess(Consumer<Object> consumer);
 
 	/**
-	 * Creates new instance mapper given consumer of failure event.
+	 * Creates new instance with given consumer of failure event.
 	 * @param consumer the consumer
 	 * @return new instance
 	 */
 	public abstract Try<V, E> onFailure(Consumer<Exception> consumer);
 
     /**
-     * Creates new instance mapper given mapper.
+     * Creates new instance with given exception mapper.
      * @param mapper the mapper
-	 * @param <X> the type of exception
+	 * @param <X> the exception type
      * @return new instance
      */
 	public abstract <X extends Exception> Try<V, X> mapper(Function<Exception, X> mapper);
 
 	/**
-	 * Creates new instance mapper given filter.
+	 * Creates new instance with given value filter.
 	 * @param filter the filter
 	 * @return new instance
 	 */
 	public abstract Try<V, E> filter(Predicate<Object> filter);
 
     /**
-     * Creates new instance mapper given callable.
+     * Creates new instance with given callable.
      * @param callable the callable
-	 * @param <R> the result type
+	 * @param <R> the result's value type
      * @return new instance
      */
     public static <R> Try<R, Exception> of(Callable<R> callable) {
@@ -179,9 +179,9 @@ public abstract class Try<V, E extends Exception> {
     }
 
 	/**
-     * Creates new instance mapper given exception.
+     * Creates new instance with given exception.
      * @param exception the exception
-	 * @param <R> the result type
+	 * @param <R> the result's value type
      * @return new instance
      */
     public static <R> Try<R, Exception> failure(Exception exception) {
@@ -189,9 +189,9 @@ public abstract class Try<V, E extends Exception> {
 	}
 
     /**
-     * Creates new instance mapper given value.
+     * Creates new instance with given value.
      * @param value the value
-	 * @param <R> the result type
+	 * @param <R> the result's value type
      * @return new instance
      */
     public static <R> Try<R, Exception> success(R value) {
@@ -516,7 +516,7 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		private Optional<V> evaluate(Callable<V> callable) throws Exception {
-			return Optional.ofNullable(call(callable)).filter(filter);
+			return Optional.ofNullable(callOrElse(callable)).filter(filter);
 		}
 
 		private <R> TrySuccess<R, E> empty() {
@@ -531,7 +531,7 @@ public abstract class Try<V, E extends Exception> {
 			return callable.call();
 		}
 
-		private V call(Callable<V> callable) throws Exception {
+		private V callOrElse(Callable<V> callable) throws Exception {
 			try {
 				return call();
 			} catch (Exception e) {
