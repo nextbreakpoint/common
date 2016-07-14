@@ -4,15 +4,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class SuccessTest {
@@ -20,40 +21,39 @@ public class SuccessTest {
 	public ExpectedException exception = ExpectedException.none();
 
 	@Test
-	public void shouldNotReturnNullWhenValueIsNull() {
+	public void shouldNotBeNullWhenValueIsNull() {
 		assertNotNull(Try.success(null));
 	}
 
 	@Test
-	public void shouldNotReturnNullWhenValueIsNullAndMapperIsNotNull() {
-		assertNotNull(Try.success(e -> e, null));
+	public void shouldNotBeNullWhenValueIsNotNull() {
+		assertNotNull(Try.success("X"));
+	}
+
+	@Test
+	public void shouldNotBeNullWhenValueIsNullAndMapperIsNotNull() {
+		assertNotNull(Try.success(null).mapper(e -> e));
+	}
+
+	@Test
+	public void shouldNotBeNullWhenValueIsNotNullAndMapperIsNotNull() {
+		assertNotNull(Try.success("X").mapper(e -> e));
 	}
 
 	@Test
 	public void shouldThrowNullPointerExceptionWhenMapperIsNull() {
 		exception.expect(NullPointerException.class);
-		Try.success(null, "X");
-	}
-
-	@Test
-	public void shouldThrowNullPointerExceptionWhenValueIsNullAndMapperIsNull() {
-		exception.expect(NullPointerException.class);
-		Try.success(null, null);
-	}
-
-	@Test
-	public void shouldNotReturnNullWhenValueIsNotNull() {
-		assertNotNull(Try.success("X"));
-	}
-
-	@Test
-	public void shouldNotReturnNullWhenValueIsNotNullAndMapperIsNotNull() {
-		assertNotNull(Try.success(e -> e, "X"));
+		Try.success("X").mapper(null);
 	}
 
 	@Test
 	public void isFailureShouldReturnFalseWhenValueIsNull() {
 		assertFalse(Try.success(null).isFailure());
+	}
+
+	@Test
+	public void isSuccessShouldReturnTrueWhenValueIsNull() {
+		assertTrue(Try.success(null).isSuccess());
 	}
 
 	@Test
@@ -63,19 +63,19 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnElseValueWhenValueIsNull() {
-		assertEquals("X", Try.success(null).getOrElse("X"));
+	public void getOrElseShouldReturnGivenDefaultWhenValueIsNull() {
+		assertEquals("X", Try.success(null).orElse("X"));
 	}
 
 	@Test
-	public void getOrThrowShouldThrowNoSuchElementExceptionWhenValueIsNull() throws Throwable {
+	public void getOrThrowShouldThrowNoSuchElementExceptionWhenValueIsNull() throws Exception {
 		exception.expect(NoSuchElementException.class);
-		Try.success(null).getOrThrow();
+		Try.success(null).orThrow();
 	}
 
 	@Test
-	public void getOrThrowWithErrorValueShouldReturnGivenValueWhenValueIsNull() throws Throwable {
-		assertEquals("X", Try.success(null).getOrThrow("X"));
+	public void getOrThrowWithDefaultValueShouldReturnDefaultValueWhenValueIsNull() throws Exception {
+		assertEquals("X", Try.success(null).orThrow("X"));
 	}
 
 	@Test
@@ -85,15 +85,13 @@ public class SuccessTest {
 
 	@Test
 	public void ifPresentWithConsumerShouldNotCallConsumerWhenValueIsNull() {
-		@SuppressWarnings("unchecked")
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try.success(null).ifPresent(consumer);
 		verify(consumer, times(0)).accept(any());
 	}
 
 	@Test
-	public void ifPresentOrThrowShouldNotCallConsumerWhenValueIsNull() throws Throwable {
-		@SuppressWarnings("unchecked")
+	public void ifPresentOrThrowShouldNotCallConsumerWhenValueIsNull() throws Exception {
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try.success(null).ifPresentOrThrow(consumer);
 		verify(consumer, times(0)).accept(any());
@@ -101,15 +99,21 @@ public class SuccessTest {
 
 	@Test
 	public void ifFailureShouldNotCallConsumerWhenValueIsNull() {
-		@SuppressWarnings("unchecked")
-		Consumer<Throwable> consumer = mock(Consumer.class);
+		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.success(null).ifFailure(consumer);
 		verify(consumer, times(0)).accept(any());
 	}
 
 	@Test
-	public void throwExceptionShouldNotThrowExceptionWhenValueIsNull() throws Throwable {
-		Try.success(null).throwException();
+	public void ifSuccessShouldCallConsumerWhenValueIsNull() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.success(null).ifSuccess(consumer);
+		verify(consumer, times(1)).accept(any());
+	}
+
+	@Test
+	public void throwExceptionShouldNotThrowExceptionWhenValueIsNull() throws Exception {
+		Try.success(null).throwIfFailure();
 	}
 
 	@Test
@@ -119,44 +123,49 @@ public class SuccessTest {
 
 	@Test
 	public void mapShouldNotCallFunctionWhenValueIsNull() {
-		@SuppressWarnings("unchecked")
 		Function<Object, Object> function = mock(Function.class);
-		Try.success(null).map(function);
+		when(function.apply(null)).thenReturn("Y");
+		Try.success(null).map(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
 	public void flatMapShouldNotCallFunctionWhenValueIsNull() {
-		@SuppressWarnings("unchecked")
-		Function<Object, Try<Object, Throwable>> function = mock(Function.class);
-		Try.success(null).flatMap(function);
+		Function<Object, Try<Object, Exception>> function = mock(Function.class);
+		when(function.apply(null)).thenReturn(Try.success("Y"));
+		Try.success(null).flatMap(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
-	public void onSuccessShouldNotCallConsumerWhenValueIsNull() {
-		@SuppressWarnings("unchecked")
-		Consumer<Object> consumer = mock(Consumer.class);
-		Try.success(null).onSuccess(consumer);
+	public void shouldCallSuccessConsumerWhenValueIsNull() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.success(null).onSuccess(consumer).orElse(null);
+		verify(consumer, times(1)).accept(anyObject());
+	}
+
+	@Test
+	public void shouldNotCallFailureConsumerWhenValueIsNull() {
+		Consumer<Exception> consumer = mock(Consumer.class);
+		Try.success(null).onFailure(consumer).orElse(null);
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
 	@Test
-	public void onFailureShouldNotCallConsumerWhenValueIsNull() {
-		@SuppressWarnings("unchecked")
-		Consumer<Throwable> consumer = mock(Consumer.class);
-		Try.success(null).onFailure(consumer);
-		verify(consumer, times(0)).accept(anyObject());
-	}
-
-	@Test
-	public void convertShouldReturnSuccessWhenValueIsNull() {
-		assertFalse(Try.success(null).convert(testMapper()).isFailure());
+	public void shouldNotCallSecondCallableWhenValueIsNull() throws Exception {
+		Callable<Object> callable = mock(Callable.class);
+		Try.success(null).or(callable).isPresent();
+		verify(callable, times(0)).call();
 	}
 
 	@Test
 	public void isFailureShouldReturnFalseWhenValueIsNotNull() {
 		assertFalse(Try.success("X").isFailure());
+	}
+
+	@Test
+	public void isSuccessShouldReturnTrueWhenValueIsNotNull() {
+		assertTrue(Try.success("X").isSuccess());
 	}
 
 	@Test
@@ -166,17 +175,17 @@ public class SuccessTest {
 
 	@Test
 	public void getOrElseShouldReturnValueWhenValueIsNotNull() {
-		assertEquals("X", Try.success("X").getOrElse("Y"));
+		assertEquals("X", Try.success("X").orElse("Y"));
 	}
 
 	@Test
-	public void getOrThrowShouldReturnValueWhenValueIsNotNull() throws Throwable {
-		assertEquals("X", Try.success("X").getOrThrow());
+	public void getOrThrowShouldReturnValueWhenValueIsNotNull() throws Exception {
+		assertEquals("X", Try.success("X").orThrow());
 	}
 
 	@Test
-	public void getOrThrowWithErrorValueShouldReturnValueWhenValueIsNotNull() throws Throwable {
-		assertEquals("X", Try.success("X").getOrThrow("Y"));
+	public void getOrThrowWithDefaultValueShouldReturnValueWhenValueIsNotNull() throws Exception {
+		assertEquals("X", Try.success("X").orThrow("Y"));
 	}
 
 	@Test
@@ -186,15 +195,13 @@ public class SuccessTest {
 
 	@Test
 	public void ifPresentWithConsumerShouldCallConsumerWhenValueIsNotNull() {
-		@SuppressWarnings("unchecked")
 		Consumer<String> consumer = mock(Consumer.class);
 		Try.success("X").ifPresent(consumer);
 		verify(consumer, times(1)).accept(any());
 	}
 
 	@Test
-	public void ifPresentOrThrowShouldCallConsumerWhenValueIsNotNull() throws Throwable {
-		@SuppressWarnings("unchecked")
+	public void ifPresentOrThrowShouldCallConsumerWhenValueIsNotNull() throws Exception {
 		Consumer<String> consumer = mock(Consumer.class);
 		Try.success("X").ifPresentOrThrow(consumer);
 		verify(consumer, times(1)).accept(any());
@@ -202,15 +209,21 @@ public class SuccessTest {
 
 	@Test
 	public void ifFailureShouldNotCallConsumerWhenValueIsNotNull() {
-		@SuppressWarnings("unchecked")
-		Consumer<Throwable> consumer = mock(Consumer.class);
+		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.success("X").ifFailure(consumer);
 		verify(consumer, times(0)).accept(any());
 	}
 
 	@Test
-	public void throwExceptionShouldNotThrowExceptionWhenValueIsNotNull() throws Throwable {
-		Try.success("X").throwException();
+	public void ifSuccessShouldCallConsumerWhenValueIsNotNull() {
+		Consumer<Optional<String>> consumer = mock(Consumer.class);
+		Try.success("X").ifSuccess(consumer);
+		verify(consumer, times(1)).accept(any());
+	}
+
+	@Test
+	public void throwExceptionShouldNotThrowExceptionWhenValueIsNotNull() throws Exception {
+		Try.success("X").throwIfFailure();
 	}
 
 	@Test
@@ -220,23 +233,22 @@ public class SuccessTest {
 
 	@Test
 	public void mapShouldCallFunctionWhenValueIsNotNull() {
-		@SuppressWarnings("unchecked")
 		Function<String, Object> function = mock(Function.class);
-		Try.success("X").map(function);
+		when(function.apply("X")).thenReturn("Y");
+		Try.success("X").map(function).get();
 		verify(function, times(1)).apply("X");
 	}
 
 	@Test
 	public void flatMapShouldCallFunctionWhenValueIsNotNull() {
-		@SuppressWarnings("unchecked")
-		Function<String, Try<Object, Throwable>> function = mock(Function.class);
-		Try.success("X").flatMap(function);
+		Function<String, Try<Object, Exception>> function = mock(Function.class);
+		when(function.apply("X")).thenReturn(Try.success("Y"));
+		Try.success("X").flatMap(function).get();
 		verify(function, times(1)).apply("X");
 	}
 
 	@Test
 	public void mapShouldReturnFailureWhenFunctionThrowsException() {
-		@SuppressWarnings("unchecked")
 		Function<String, Object> function = mock(Function.class);
 		when(function.apply(any())).thenThrow(RuntimeException.class);
 		assertTrue(Try.success("X").map(function).isFailure());
@@ -244,34 +256,135 @@ public class SuccessTest {
 
 	@Test
 	public void flatMapShouldReturnFailureWhenFunctionThrowsException() {
-		@SuppressWarnings("unchecked")
-		Function<String, Try<Object, Throwable>> function = mock(Function.class);
+		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply(any())).thenThrow(RuntimeException.class);
 		assertTrue(Try.success("X").flatMap(function).isFailure());
 	}
 
 	@Test
-	public void onSuccessShouldCallConsumerWhenValueIsNotNull() {
-		@SuppressWarnings("unchecked")
-		Consumer<String> consumer = mock(Consumer.class);
-		Try.success("X").onSuccess(consumer);
-		verify(consumer, times(1)).accept(anyString());
+	public void mapShouldThrowNoSuchElementExceptionWhenFunctionReturnsNull() {
+		exception.expect(NoSuchElementException.class);
+		Function<String, Object> function = mock(Function.class);
+		when(function.apply(any())).thenReturn(null);
+		Try.success("X").map(function).get();
 	}
 
 	@Test
-	public void onFailureShouldNotCallConsumerWhenValueIsNotNull() {
-		@SuppressWarnings("unchecked")
-		Consumer<Throwable> consumer = mock(Consumer.class);
-		Try.success("X").onFailure(consumer);
+	public void flatMapShouldThrowNoSuchElementExceptionWhenFunctionReturnsNull() {
+		exception.expect(NoSuchElementException.class);
+		Function<String, Try<Object, Exception>> function = mock(Function.class);
+		when(function.apply(any())).thenReturn(null);
+		Try.success("X").flatMap(function).get();
+	}
+
+	@Test
+	public void mapShouldCallFilterWhenValueIsNotNull() {
+		Function<String, Object> function = mock(Function.class);
+		Predicate<Object> filter = mock(Predicate.class);
+		when(function.apply("X")).thenReturn("Y");
+		when(filter.test("X")).thenReturn(true);
+		Try.success("X").filter(filter).map(function).get();
+		verify(filter, times(1)).test("X");
+	}
+
+	@Test
+	public void flatMapShouldCallFilterWhenValueIsNotNull() {
+		Function<String, Try<Object, Exception>> function = mock(Function.class);
+		Predicate<Object> filter = mock(Predicate.class);
+		when(function.apply("X")).thenReturn(Try.success("Y"));
+		when(filter.test("X")).thenReturn(true);
+		Try.success("X").filter(filter).flatMap(function).get();
+		verify(filter, times(1)).test("X");
+	}
+
+	@Test
+	public void mapShouldCallFunctionWhenFilterReturnsTrue() {
+		Function<String, Object> function = mock(Function.class);
+		Predicate<Object> filter = mock(Predicate.class);
+		when(function.apply("X")).thenReturn("Y");
+		when(filter.test("X")).thenReturn(true);
+		Try.success("X").filter(filter).map(function).get();
+		verify(function, times(1)).apply("X");
+	}
+
+	@Test
+	public void flatMapShouldCallFunctionWhenFilterReturnsTrue() {
+		Function<String, Try<Object, Exception>> function = mock(Function.class);
+		Predicate<Object> filter = mock(Predicate.class);
+		when(function.apply("X")).thenReturn(Try.success("Y"));
+		when(filter.test("X")).thenReturn(true);
+		Try.success("X").filter(filter).flatMap(function).get();
+		verify(function, times(1)).apply("X");
+	}
+
+	@Test
+	public void shouldCallFilterWhenValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(true);
+		Try.success("X").filter(filter).get();
+		verify(filter, times(1)).test("X");
+	}
+
+	@Test
+	public void shouldNotReturnValueWhenFilterReturnsFalseAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(false);
+		assertFalse(Try.success("X").filter(filter).isPresent());
+	}
+
+	@Test
+	public void shouldHaveValueWhenFilterReturnsTrueAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertTrue(Try.success("X").map(v -> v.toLowerCase()).filter(filter).isPresent());
+	}
+
+	@Test
+	public void shouldNotHaveValueWhenFilterReturnsFalseBeforeMapAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertFalse(Try.success("X").filter(filter).map(v -> v.toLowerCase()).isPresent());
+	}
+
+	@Test
+	public void shouldNotHaveValueWhenFilterReturnsFalseAfterMapAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(true);
+		assertFalse(Try.success("X").map(v -> v.toLowerCase()).filter(filter).isPresent());
+	}
+
+	@Test
+	public void shouldReturnValueWhenFilterIsAfterMapAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("x")).thenReturn(true);
+		assertEquals(Try.success("X").map(v -> v.toLowerCase()).filter(filter).get(), "x");
+	}
+
+	@Test
+	public void shouldReturnValueWhenFilterIsBeforeMapAndValueIsNotNull() {
+		Predicate<Object> filter = mock(Predicate.class);
+		when(filter.test("X")).thenReturn(true);
+		assertEquals(Try.success("X").filter(filter).map(v -> v.toLowerCase()).get(), "x");
+	}
+
+	@Test
+	public void shouldCallSuccessConsumerWhenValueIsNotNull() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.success("X").onSuccess(consumer).isPresent();
+		verify(consumer, times(1)).accept(anyObject());
+	}
+
+	@Test
+	public void shouldNotCallFailureConsumerWhenValueIsNotNull() {
+		Consumer<Exception> consumer = mock(Consumer.class);
+		Try.success("X").onFailure(consumer).isPresent();
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
 	@Test
-	public void convertShouldReturnSuccessWhenValueIsNotNull() {
-		assertFalse(Try.success("X").convert(testMapper()).isFailure());
-	}
-
-	private static Function<Throwable, IOException> testMapper() {
-		return e -> (e instanceof IOException) ? (IOException)e : new IOException("IO Error", e);
+	public void shouldNotCallSecondCallableWhenValueIsNotNull() throws Exception {
+		Callable<String> callable = mock(Callable.class);
+		Try.success("X").or(callable).isPresent();
+		verify(callable, times(0)).call();
 	}
 }
