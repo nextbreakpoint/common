@@ -543,7 +543,7 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public Try<V, E> or(Callable<V> callable) {
-			return orTry(callable);
+			return create(() -> orTry(callable));
 		}
 
 		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
@@ -582,6 +582,10 @@ public abstract class Try<V, E extends Exception> {
 			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, null);
 		}
 
+		private <R> Try<R, E> fail(E exception) {
+			return new TryFailure<>(mapper, defaultFilter(), onSuccess, onFailure, exception);
+		}
+
 		private <R> Try<R, E> create(R value) {
 			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, value);
 		}
@@ -598,12 +602,11 @@ public abstract class Try<V, E extends Exception> {
 			return callable.call();
 		}
 
-		private Try<V, E> orTry(Callable<V> callable) {
+		private V orTry(Callable<V> callable) throws Exception {
 			try {
-				return create(call());
+				return call();
 			} catch (Exception e) {
-				Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(e));
-				return new TryCallable<>(mapper, defaultFilter(), null, null, callable);
+				return call(callable);
 			}
 		}
 	}
