@@ -65,6 +65,16 @@ public class FailureTest {
 	}
 
 	@Test
+	public void orElseShouldReturnSupplierValue() {
+		assertEquals("X", Try.failure(new Exception()).orElseGet(() -> "X"));
+	}
+
+	@Test
+	public void orElseShouldReturnNullWhenSupplierReturnsNull() {
+		assertNull(Try.failure(new Exception()).orElseGet(() -> null));
+	}
+
+	@Test
 	public void orThrowShouldThrowException() throws Exception {
 		exception.expect(IllegalAccessException.class);
 		Try.failure(new IllegalAccessException()).orThrow();

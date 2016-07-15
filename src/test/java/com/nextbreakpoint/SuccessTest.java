@@ -63,8 +63,18 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void orElseShouldReturnGivenDefaultWhenValueIsNull() {
+	public void orElseShouldReturnDefaultWhenValueIsNull() {
 		assertEquals("X", Try.success(null).orElse("X"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnSupplierValueWhenValueIsNull() {
+		assertEquals("X", Try.success(null).orElseGet(() -> "X"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnNullValueWhenValueIsNullAndSupplierReturnsNull() {
+		assertNull(Try.success(null).orElseGet(() -> null));
 	}
 
 	@Test
@@ -176,6 +186,16 @@ public class SuccessTest {
 	@Test
 	public void orElseShouldReturnValueWhenValueIsNotNull() {
 		assertEquals("X", Try.success("X").orElse("Y"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnValueWhenValueIsNotNull() {
+		assertEquals("X", Try.success("X").orElseGet(() -> "X"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnValueWhenValueIsNotNullAndSupplierReturnsNull() {
+		assertEquals("X", Try.success("X").orElseGet(() -> null));
 	}
 
 	@Test

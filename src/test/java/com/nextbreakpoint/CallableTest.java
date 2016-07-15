@@ -79,6 +79,16 @@ public class CallableTest {
 	}
 
 	@Test
+	public void orElseGetShouldReturnSupplierValueWhenCallableReturnsNull() {
+		assertEquals("X", Try.of(() -> null).orElseGet(() -> "X"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnNullWhenCallableReturnsNullAndSupplierReturnsNull() {
+		assertNull(Try.of(() -> null).orElseGet(() -> null));
+	}
+
+	@Test
 	public void orThrowShouldThrowNoSuchElementExceptionWhenCallableReturnsNull() throws Exception {
 		exception.expect(NoSuchElementException.class);
 		Try.of(() -> null).orThrow();
@@ -178,6 +188,16 @@ public class CallableTest {
 	@Test
 	public void orElseShouldReturnValueWhenCallableReturnsValue() {
 		assertEquals("X", Try.of(() -> "X").orElse("Y"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnValueWhenCallableReturnsValue() {
+		assertEquals("X", Try.of(() -> "X").orElseGet(() -> "Y"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnValueWhenCallableReturnsValueAndSupplierReturnsNull() {
+		assertEquals("X", Try.of(() -> "X").orElseGet(() -> null));
 	}
 
 	@Test
@@ -360,6 +380,16 @@ public class CallableTest {
 	@Test
 	public void orElseShouldReturnDefaultValueWhenCallableThrowsException() {
 		assertEquals("X", Try.of(() -> { throw new Exception(); }).orElse("X"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnSupplierValueWhenCallableThrowsException() {
+		assertEquals("X", Try.of(() -> { throw new Exception(); }).orElseGet(() -> "X"));
+	}
+
+	@Test
+	public void orElseGetShouldReturnNullWhenCallableThrowsExceptionAndSupplierReturnsNull() {
+		assertNull(Try.of(() -> { throw new Exception(); }).orElseGet(() -> null));
 	}
 
 	@Test
