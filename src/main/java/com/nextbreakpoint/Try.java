@@ -13,6 +13,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Try implements a monad for handling checked and unchecked exceptions.
@@ -99,7 +100,14 @@ public abstract class Try<V, E extends Exception> {
 	 * @return the value
 	 */
 	public abstract V orElse(V value);
-	
+
+	/**
+	 * Returns the value if present or invokes the supplier to get the value.
+	 * @param supplier the supplier
+	 * @return the value
+	 */
+	public abstract V orElseGet(Supplier<V> supplier);
+
 	/**
 	 * Returns the value if present or throws exception if failure.
 	 * Throws NoSuchElementException if value not present.
@@ -283,11 +291,16 @@ public abstract class Try<V, E extends Exception> {
 			return value;
 		}
 
+		public V orElseGet(Supplier<V> supplier) {
+			notifyEvent();
+			return supplier.get();
+		}
+
 		public V orThrow() throws E {
 			notifyEvent();
 			throw exception;
 	    }
-		
+
 		public V orThrow(V value) throws E {
 			notifyEvent();
 			throw exception;
@@ -386,6 +399,10 @@ public abstract class Try<V, E extends Exception> {
 			return value().orElse(value);
 		}
 
+		public V orElseGet(Supplier<V> supplier) {
+			return value().orElseGet(supplier);
+		}
+
 		public V orThrow() throws E {
 	        return value().get();
 	    }
@@ -435,11 +452,11 @@ public abstract class Try<V, E extends Exception> {
 			return Optional.ofNullable(value).filter(filter);
 		}
 
-		private <R> TrySuccess<R, E> empty() {
-			return new TrySuccess<>(mapper, filter, onSuccess, onFailure, null);
+		private <R> Try<R, E> empty() {
+			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, null);
 		}
 
-		private <R> TryCallable<R, E> create(Callable<R> callable) {
+		private <R> Try<R, E> create(Callable<R> callable) {
 			return new TryCallable<>(mapper, defaultFilter(), onSuccess, onFailure, callable);
 		}
 
@@ -497,6 +514,10 @@ public abstract class Try<V, E extends Exception> {
 			return execute().orElse(value);
 		}
 
+		public V orElseGet(Supplier<V> supplier) {
+			return execute().orElseGet(supplier);
+		}
+
 		public V orThrow() throws E {
 			return execute().orThrow();
 		}
@@ -522,7 +543,7 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public Try<V, E> or(Callable<V> callable) {
-			return create(() -> callOrElse(callable));
+			return orTry(callable);
 		}
 
 		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
@@ -557,11 +578,15 @@ public abstract class Try<V, E extends Exception> {
 			return Optional.ofNullable(call(callable)).filter(filter);
 		}
 
-		private <R> TrySuccess<R, E> empty() {
-			return new TrySuccess<>(mapper, filter, onSuccess, onFailure, null);
+		private <R> Try<R, E> empty() {
+			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, null);
 		}
 
-		private <R> TryCallable<R, E> create(Callable<R> callable) {
+		private <R> Try<R, E> create(R value) {
+			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, value);
+		}
+
+		private <R> Try<R, E> create(Callable<R> callable) {
 			return new TryCallable<>(mapper, defaultFilter(), onSuccess, onFailure, callable);
 		}
 
@@ -573,11 +598,12 @@ public abstract class Try<V, E extends Exception> {
 			return callable.call();
 		}
 
-		private V callOrElse(Callable<V> callable) throws Exception {
+		private Try<V, E> orTry(Callable<V> callable) {
 			try {
-				return call();
+				return create(call());
 			} catch (Exception e) {
-				return call(callable);
+				Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(e));
+				return new TryCallable<>(mapper, defaultFilter(), null, null, callable);
 			}
 		}
 	}
