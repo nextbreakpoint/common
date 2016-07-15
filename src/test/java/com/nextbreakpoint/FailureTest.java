@@ -60,18 +60,18 @@ public class FailureTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnDefaultValue() {
+	public void orElseShouldReturnDefaultValue() {
 		assertEquals("X", Try.failure(new Exception()).orElse("X"));
 	}
 
 	@Test
-	public void getOrThrowShouldThrowException() throws Exception {
+	public void orThrowShouldThrowException() throws Exception {
 		exception.expect(IllegalAccessException.class);
 		Try.failure(new IllegalAccessException()).orThrow();
 	}
 
 	@Test
-	public void getOrThrowWithDefaultValueShouldThrowException() throws Exception {
+	public void orThrowWithDefaultValueShouldThrowException() throws Exception {
 		exception.expect(IllegalAccessException.class);
 		Try.failure(new IllegalAccessException()).orThrow("X");
 	}
@@ -121,14 +121,14 @@ public class FailureTest {
 	}
 
 	@Test
-	public void mapShouldNotCallFunction() {
+	public void shouldNotCallFunctionForMap() {
 		Function<Object, Object> function = mock(Function.class);
 		Try.failure(new Exception()).map(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
-	public void flatMapShouldNotCallFunction() {
+	public void shouldNotCallFunctionForFlatMap() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
 		Try.failure(new Exception()).flatMap(function).orElse(null);
 		verify(function, times(0)).apply(any());
@@ -163,7 +163,7 @@ public class FailureTest {
 	}
 
 	@Test
-	public void mapShouldNotCallFilter() {
+	public void shouldNotCallFilterForMap() {
 		Function<Object, Object> function = mock(Function.class);
 		Predicate<Object> filter = mock(Predicate.class);
 		when(function.apply("X")).thenReturn("Y");
@@ -173,7 +173,7 @@ public class FailureTest {
 	}
 
 	@Test
-	public void flatMapShouldNotCallFilter() {
+	public void shouldNotCallFilterForFlatMap() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
 		Predicate<Object> filter = mock(Predicate.class);
 		when(function.apply("X")).thenReturn(Try.success("Y"));

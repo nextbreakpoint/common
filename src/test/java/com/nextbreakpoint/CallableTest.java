@@ -74,18 +74,18 @@ public class CallableTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnDefaultValueWhenCallableReturnsNull() {
+	public void orElseShouldReturnDefaultValueWhenCallableReturnsNull() {
 		assertEquals("X", Try.of(() -> null).orElse("X"));
 	}
 
 	@Test
-	public void getOrThrowShouldThrowNoSuchElementExceptionWhenCallableReturnsNull() throws Exception {
+	public void orThrowShouldThrowNoSuchElementExceptionWhenCallableReturnsNull() throws Exception {
 		exception.expect(NoSuchElementException.class);
 		Try.of(() -> null).orThrow();
 	}
 
 	@Test
-	public void getOrThrowWithDefaultValueShouldReturnDefaultValueWhenCallableReturnsNull() throws Exception {
+	public void orThrowWithDefaultValueShouldReturnDefaultValueWhenCallableReturnsNull() throws Exception {
 		assertEquals("X", Try.of(() -> null).orThrow("X"));
 	}
 
@@ -133,14 +133,14 @@ public class CallableTest {
 	}
 
 	@Test
-	public void mapShouldNotCallFunctionWhenCallableReturnsNull() {
+	public void shouldNotCallFunctionForMapWhenCallableReturnsNull() {
 		Function<Object, Object> function = mock(Function.class);
 		Try.of(() -> null).map(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
-	public void flatMapShouldNotCallFunctionWhenCallableReturnsNull() {
+	public void shouldNotCallFunctionForFlatMapWhenCallableReturnsNull() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
 		Try.of(() -> null).flatMap(function).orElse(null);
 		verify(function, times(0)).apply(any());
@@ -176,17 +176,17 @@ public class CallableTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnValueWhenCallableReturnsValue() {
+	public void orElseShouldReturnValueWhenCallableReturnsValue() {
 		assertEquals("X", Try.of(() -> "X").orElse("Y"));
 	}
 
 	@Test
-	public void getOrThrowShouldReturnValueWhenCallableReturnsValue() throws Exception {
+	public void orThrowShouldReturnValueWhenCallableReturnsValue() throws Exception {
 		assertEquals("X", Try.of(() -> "X").orThrow());
 	}
 
 	@Test
-	public void getOrThrowWithDefaultValueShouldReturnValueWhenCallableReturnsValue() throws Exception {
+	public void orThrowWithDefaultValueShouldReturnValueWhenCallableReturnsValue() throws Exception {
 		assertEquals("X", Try.of(() -> "X").orThrow("Y"));
 	}
 
@@ -234,7 +234,7 @@ public class CallableTest {
 	}
 
 	@Test
-	public void mapShouldCallFunctionWhenCallableReturnsValue() {
+	public void shouldCallFunctionForMapWhenCallableReturnsValue() {
 		Function<String, Object> function = mock(Function.class);
 		when(function.apply("X")).thenReturn("Y");
 		Try.of(() -> "X").map(function).get();
@@ -242,7 +242,7 @@ public class CallableTest {
 	}
 
 	@Test
-	public void flatMapShouldCallFunctionWhenCallableReturnsValue() {
+	public void shouldCallFunctionForFlatMapWhenCallableReturnsValue() {
 		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply("X")).thenReturn(Try.of(() -> "Y"));
 		Try.of(() -> "X").flatMap(function).get();
@@ -250,28 +250,28 @@ public class CallableTest {
 	}
 
 	@Test
-	public void mapShouldReturnFailureWhenFunctionThrowsException() {
+	public void shouldReturnFailureWhenFunctionForMapThrowsException() {
 		Function<String, Object> function = mock(Function.class);
 		when(function.apply(any())).thenThrow(RuntimeException.class);
 		assertTrue(Try.of(() -> "X").map(function).isFailure());
 	}
 
 	@Test
-	public void flatMapShouldReturnFailureWhenFunctionThrowsException() {
+	public void shouldReturnFailureWhenFunctionForFlatMapThrowsException() {
 		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply(any())).thenThrow(RuntimeException.class);
 		assertTrue(Try.of(() -> "X").flatMap(function).isFailure());
 	}
 
 	@Test
-	public void mapShouldNotReturnFailureWhenFunctionReturnsNull() {
+	public void shouldNotReturnFailureWhenFunctionForMapReturnsNull() {
 		Function<String, Object> function = mock(Function.class);
 		when(function.apply(any())).thenReturn(null);
 		assertFalse(Try.of(() -> "X").map(function).isFailure());
 	}
 
 	@Test
-	public void flatMapShouldNotReturnFailureWhenFunctionReturnsNull() {
+	public void shouldNotReturnFailureWhenFunctionForFlatMapReturnsNull() {
 		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply(any())).thenReturn(null);
 		assertFalse(Try.of(() -> "X").flatMap(function).isFailure());
@@ -358,18 +358,18 @@ public class CallableTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnDefaultValueWhenCallableThrowsException() {
+	public void orElseShouldReturnDefaultValueWhenCallableThrowsException() {
 		assertEquals("X", Try.of(() -> { throw new Exception(); }).orElse("X"));
 	}
 
 	@Test
-	public void getOrThrowShouldThrowExceptionWhenCallableThrowsException() throws Exception {
+	public void orThrowShouldThrowExceptionWhenCallableThrowsException() throws Exception {
 		exception.expect(IllegalAccessException.class);
 		Try.of(() -> { throw new IllegalAccessException(); }).orThrow();
 	}
 
 	@Test
-	public void getOrThrowWithDefaultValueShouldThrowExceptionWhenCallableThrowsException() throws Exception {
+	public void orThrowWithDefaultValueShouldThrowExceptionWhenCallableThrowsException() throws Exception {
 		exception.expect(IllegalAccessException.class);
 		Try.of(() -> { throw new IllegalAccessException(); }).orThrow("X");
 	}
@@ -419,14 +419,14 @@ public class CallableTest {
 	}
 
 	@Test
-	public void mapShouldNotCallFunctionWhenCallableThrowsException() {
+	public void shouldNotCallFunctionForMapWhenCallableThrowsException() {
 		Function<Object, Object> function = mock(Function.class);
 		Try.of(() -> { throw new Exception(); }).map(function).orElse(null);
 		verify(function, times(0)).apply(any());
 	}
 
 	@Test
-	public void flatMapShouldNotCallFunctionWhenCallableThrowsException() {
+	public void shouldNotCallFunctionForFlatMapWhenCallableThrowsException() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
 		Try.of(() -> { throw new Exception(); }).flatMap(function).orElse(null);
 		verify(function, times(0)).apply(any());

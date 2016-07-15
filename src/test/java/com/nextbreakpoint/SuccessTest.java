@@ -63,18 +63,18 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnGivenDefaultWhenValueIsNull() {
+	public void orElseShouldReturnGivenDefaultWhenValueIsNull() {
 		assertEquals("X", Try.success(null).orElse("X"));
 	}
 
 	@Test
-	public void getOrThrowShouldThrowNoSuchElementExceptionWhenValueIsNull() throws Exception {
+	public void orThrowShouldThrowNoSuchElementExceptionWhenValueIsNull() throws Exception {
 		exception.expect(NoSuchElementException.class);
 		Try.success(null).orThrow();
 	}
 
 	@Test
-	public void getOrThrowWithDefaultValueShouldReturnDefaultValueWhenValueIsNull() throws Exception {
+	public void orThrowWithDefaultValueShouldReturnDefaultValueWhenValueIsNull() throws Exception {
 		assertEquals("X", Try.success(null).orThrow("X"));
 	}
 
@@ -122,7 +122,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void mapShouldNotCallFunctionWhenValueIsNull() {
+	public void shouldNotCallFunctionForMapWhenValueIsNull() {
 		Function<Object, Object> function = mock(Function.class);
 		when(function.apply(null)).thenReturn("Y");
 		Try.success(null).map(function).orElse(null);
@@ -130,7 +130,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void flatMapShouldNotCallFunctionWhenValueIsNull() {
+	public void shouldNotCallFunctionForFlatMapWhenValueIsNull() {
 		Function<Object, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply(null)).thenReturn(Try.success("Y"));
 		Try.success(null).flatMap(function).orElse(null);
@@ -174,17 +174,17 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void getOrElseShouldReturnValueWhenValueIsNotNull() {
+	public void orElseShouldReturnValueWhenValueIsNotNull() {
 		assertEquals("X", Try.success("X").orElse("Y"));
 	}
 
 	@Test
-	public void getOrThrowShouldReturnValueWhenValueIsNotNull() throws Exception {
+	public void orThrowShouldReturnValueWhenValueIsNotNull() throws Exception {
 		assertEquals("X", Try.success("X").orThrow());
 	}
 
 	@Test
-	public void getOrThrowWithDefaultValueShouldReturnValueWhenValueIsNotNull() throws Exception {
+	public void orThrowWithDefaultValueShouldReturnValueWhenValueIsNotNull() throws Exception {
 		assertEquals("X", Try.success("X").orThrow("Y"));
 	}
 
@@ -232,7 +232,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void mapShouldCallFunctionWhenValueIsNotNull() {
+	public void shouldCallFunctionForMapWhenValueIsNotNull() {
 		Function<String, Object> function = mock(Function.class);
 		when(function.apply("X")).thenReturn("Y");
 		Try.success("X").map(function).get();
@@ -240,7 +240,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void flatMapShouldCallFunctionWhenValueIsNotNull() {
+	public void shouldCallFunctionForFlatMapWhenValueIsNotNull() {
 		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply("X")).thenReturn(Try.success("Y"));
 		Try.success("X").flatMap(function).get();
@@ -248,21 +248,21 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void mapShouldReturnFailureWhenFunctionThrowsException() {
+	public void shouldReturnFailureWhenFunctionForMapThrowsException() {
 		Function<String, Object> function = mock(Function.class);
 		when(function.apply(any())).thenThrow(RuntimeException.class);
 		assertTrue(Try.success("X").map(function).isFailure());
 	}
 
 	@Test
-	public void flatMapShouldReturnFailureWhenFunctionThrowsException() {
+	public void shouldReturnFailureWhenFunctionForFlatMapThrowsException() {
 		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply(any())).thenThrow(RuntimeException.class);
 		assertTrue(Try.success("X").flatMap(function).isFailure());
 	}
 
 	@Test
-	public void mapShouldThrowNoSuchElementExceptionWhenFunctionReturnsNull() {
+	public void shouldThrowNoSuchElementExceptionWhenFunctionForMapReturnsNull() {
 		exception.expect(NoSuchElementException.class);
 		Function<String, Object> function = mock(Function.class);
 		when(function.apply(any())).thenReturn(null);
@@ -270,7 +270,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void flatMapShouldThrowNoSuchElementExceptionWhenFunctionReturnsNull() {
+	public void shouldThrowNoSuchElementExceptionWhenFunctionForFlatMapReturnsNull() {
 		exception.expect(NoSuchElementException.class);
 		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		when(function.apply(any())).thenReturn(null);
@@ -278,7 +278,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void mapShouldCallFilterWhenValueIsNotNull() {
+	public void shouldCallFilterForMapWhenValueIsNotNull() {
 		Function<String, Object> function = mock(Function.class);
 		Predicate<Object> filter = mock(Predicate.class);
 		when(function.apply("X")).thenReturn("Y");
@@ -288,7 +288,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void flatMapShouldCallFilterWhenValueIsNotNull() {
+	public void shouldCallFilterForFlatMapWhenValueIsNotNull() {
 		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		Predicate<Object> filter = mock(Predicate.class);
 		when(function.apply("X")).thenReturn(Try.success("Y"));
@@ -298,7 +298,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void mapShouldCallFunctionWhenFilterReturnsTrue() {
+	public void shouldCallFunctionForMapWhenFilterReturnsTrue() {
 		Function<String, Object> function = mock(Function.class);
 		Predicate<Object> filter = mock(Predicate.class);
 		when(function.apply("X")).thenReturn("Y");
@@ -308,7 +308,7 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void flatMapShouldCallFunctionWhenFilterReturnsTrue() {
+	public void shouldCallFunctionForFlatMapWhenFilterReturnsTrue() {
 		Function<String, Try<Object, Exception>> function = mock(Function.class);
 		Predicate<Object> filter = mock(Predicate.class);
 		when(function.apply("X")).thenReturn(Try.success("Y"));
