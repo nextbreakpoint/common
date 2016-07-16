@@ -8,9 +8,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class OnSuccessTest {
 	@Rule
@@ -19,7 +17,7 @@ public class OnSuccessTest {
 	@Test
 	public void shouldNotCallSuccessConsumerWhenFailure() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
-		Try.failure(new Exception()).onSuccess(consumer).orElse(null);
+		Try.failure(new Exception()).onSuccess(consumer).isFailure();
 		verify(consumer, times(0)).accept(anyObject());
 	}
 
@@ -38,6 +36,13 @@ public class OnSuccessTest {
 	}
 
 	@Test
+	public void shouldNotCallSuccessConsumerWhenCallableThrowsException() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).onSuccess(consumer).isFailure();
+		verify(consumer, times(0)).accept(anyObject());
+	}
+
+	@Test
 	public void shouldCallSuccessConsumerWhenCallableReturnsNull() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.of(() -> null).onSuccess(consumer).orElse(null);
@@ -49,12 +54,5 @@ public class OnSuccessTest {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.of(() -> "X").onSuccess(consumer).isPresent();
 		verify(consumer, times(1)).accept(anyObject());
-	}
-
-	@Test
-	public void shouldNotCallSuccessConsumerWhenCallableThrowsException() {
-		Consumer<Optional<Object>> consumer = mock(Consumer.class);
-		Try.of(() -> { throw new Exception(); }).onSuccess(consumer).isFailure();
-		verify(consumer, times(0)).accept(anyObject());
 	}
 }

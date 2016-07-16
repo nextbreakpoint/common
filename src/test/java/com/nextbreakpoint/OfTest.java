@@ -17,17 +17,17 @@ public class OfTest {
 	}
 
 	@Test
-	public void shouldNotReturnNullWhenCallableReturnsValue() {
+	public void shouldNotReturnNullWhenCallableIsNotNullAndReturnsValue() {
 		assertNotNull(Try.of(() -> "X"));
 	}
 
 	@Test
-	public void shouldNotReturnNullWhenCallableReturnsNull() {
+	public void shouldNotReturnNullWhenCallableIsNotNullAndReturnsNull() {
 		assertNotNull(Try.of(() -> null));
 	}
 
 	@Test
-	public void shouldNotReturnNullWhenCallableThrowsException() {
+	public void shouldNotReturnNullWhenCallableIsNotNullAndThrowsException() {
 		assertNotNull(Try.of(() -> { throw new Exception(); }));
 	}
 }

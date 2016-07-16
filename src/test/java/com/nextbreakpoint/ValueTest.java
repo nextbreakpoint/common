@@ -27,6 +27,11 @@ public class ValueTest {
 	}
 
 	@Test
+	public void shouldReturnEmptyOptionalWhenCallableThrowsException() {
+		assertFalse(Try.of(() -> { throw new Exception(); }).value().isPresent());
+	}
+
+	@Test
 	public void shouldReturnEmptyOptionalWhenCallableReturnsNull()  {
 		assertFalse(Try.of(() -> null).value().isPresent());
 	}
@@ -34,10 +39,5 @@ public class ValueTest {
 	@Test
 	public void shouldReturnNotEmptyOptionalWhenCallableReturnsValue() {
 		assertTrue(Try.of(() -> "X").value().isPresent());
-	}
-
-	@Test
-	public void shouldReturnEmptyOptionalWhenCallableThrowsException() {
-		assertFalse(Try.of(() -> { throw new Exception(); }).value().isPresent());
 	}
 }

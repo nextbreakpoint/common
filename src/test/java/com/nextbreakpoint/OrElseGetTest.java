@@ -27,7 +27,7 @@ public class OrElseGetTest {
 	}
 
 	@Test
-	public void shouldReturnNullValueWhenSuccessAndValueIsNullAndSupplierReturnsNull() {
+	public void shouldReturnNullWhenSuccessAndValueIsNullAndSupplierReturnsNull() {
 		assertNull(Try.success(null).orElseGet(() -> null));
 	}
 
@@ -39,6 +39,16 @@ public class OrElseGetTest {
 	@Test
 	public void shouldReturnValueWhenSuccessAndValueIsNotNullAndSupplierReturnsNull() {
 		assertEquals("X", Try.success("X").orElseGet(() -> null));
+	}
+
+	@Test
+	public void shouldReturnSupplierValueWhenCallableThrowsException() {
+		assertEquals("X", Try.of(() -> { throw new Exception(); }).orElseGet(() -> "X"));
+	}
+
+	@Test
+	public void shouldReturnNullWhenCallableThrowsExceptionAndSupplierReturnsNull() {
+		assertNull(Try.of(() -> { throw new Exception(); }).orElseGet(() -> null));
 	}
 
 	@Test
@@ -59,15 +69,5 @@ public class OrElseGetTest {
 	@Test
 	public void shouldReturnValueWhenCallableReturnsValueAndSupplierReturnsNull() {
 		assertEquals("X", Try.of(() -> "X").orElseGet(() -> null));
-	}
-
-	@Test
-	public void shouldReturnSupplierValueWhenCallableThrowsException() {
-		assertEquals("X", Try.of(() -> { throw new Exception(); }).orElseGet(() -> "X"));
-	}
-
-	@Test
-	public void shouldReturnNullWhenCallableThrowsExceptionAndSupplierReturnsNull() {
-		assertNull(Try.of(() -> { throw new Exception(); }).orElseGet(() -> null));
 	}
 }

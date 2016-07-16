@@ -46,6 +46,18 @@ public class OrThrowTest {
 	}
 
 	@Test
+	public void shouldThrowExceptionWhenCallableThrowsException() throws Exception {
+		exception.expect(IllegalAccessException.class);
+		Try.of(() -> { throw new IllegalAccessException(); }).orThrow();
+	}
+
+	@Test
+	public void shouldThrowExceptionWhenCallableThrowsExceptionAndDefaultIsNotNull() throws Exception {
+		exception.expect(IllegalAccessException.class);
+		Try.of(() -> { throw new IllegalAccessException(); }).orThrow("X");
+	}
+
+	@Test
 	public void shouldThrowNoSuchElementExceptionWhenCallableReturnsNull() throws Exception {
 		exception.expect(NoSuchElementException.class);
 		Try.of(() -> null).orThrow();
@@ -64,17 +76,5 @@ public class OrThrowTest {
 	@Test
 	public void shouldReturnValueWhenCallableReturnsValueAndDefaultIsNotNull() throws Exception {
 		assertEquals("X", Try.of(() -> "X").orThrow("Y"));
-	}
-
-	@Test
-	public void shouldThrowExceptionWhenCallableThrowsException() throws Exception {
-		exception.expect(IllegalAccessException.class);
-		Try.of(() -> { throw new IllegalAccessException(); }).orThrow();
-	}
-
-	@Test
-	public void shouldThrowExceptionWhenCallableThrowsExceptionAndDefaultIsNotNull() throws Exception {
-		exception.expect(IllegalAccessException.class);
-		Try.of(() -> { throw new IllegalAccessException(); }).orThrow("X");
 	}
 }

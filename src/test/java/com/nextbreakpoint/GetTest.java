@@ -13,6 +13,12 @@ public class GetTest {
 	public ExpectedException exception = ExpectedException.none();
 
 	@Test
+	public void shouldThrowNoSuchElementExceptionWhenFailure() {
+		exception.expect(NoSuchElementException.class);
+		Try.failure(new Exception()).get();
+	}
+
+	@Test
 	public void shouldThrowNoSuchElementExceptionWhenSuccessAndValueIsNull() {
 		exception.expect(NoSuchElementException.class);
 		Try.success(null).get();
@@ -24,9 +30,9 @@ public class GetTest {
 	}
 
 	@Test
-	public void shouldThrowNoSuchElementExceptionWhenFailure() {
+	public void shouldThrowNoSuchElementExceptionWhenCallableThrowsException() {
 		exception.expect(NoSuchElementException.class);
-		Try.failure(new Exception()).get();
+		Try.of(() -> { throw new Exception(); }).get();
 	}
 
 	@Test
@@ -38,16 +44,5 @@ public class GetTest {
 	@Test
 	public void shouldReturnValueWhenCallableReturnsValue() {
 		assertEquals("X", Try.of(() -> "X").get());
-	}
-
-	@Test
-	public void shouldThrowNoSuchElementExceptionWhenCallableThrowsException() {
-		exception.expect(NoSuchElementException.class);
-		Try.of(() -> { throw new Exception(); }).get();
-	}
-
-	@Test
-	public void shouldReturnValueWhenValueSuccessAndIsNotNull() {
-		assertEquals("X", Try.success("X").get());
 	}
 }

@@ -8,9 +8,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class IfSuccessTest {
 	@Rule
@@ -38,6 +36,13 @@ public class IfSuccessTest {
 	}
 
 	@Test
+	public void shouldNotCallConsumerWhenCallableThrowsException() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).ifSuccess(consumer);
+		verify(consumer, times(0)).accept(any());
+	}
+
+	@Test
 	public void shouldCallConsumerWhenCallableReturnsNull() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.of(() -> null).ifSuccess(consumer);
@@ -49,12 +54,5 @@ public class IfSuccessTest {
 		Consumer<Optional<String>> consumer = mock(Consumer.class);
 		Try.of(() -> "X").ifSuccess(consumer);
 		verify(consumer, times(1)).accept(any());
-	}
-
-	@Test
-	public void shouldNotCallConsumerWhenCallableThrowsException() {
-		Consumer<Optional<Object>> consumer = mock(Consumer.class);
-		Try.of(() -> { throw new Exception(); }).ifSuccess(consumer);
-		verify(consumer, times(0)).accept(any());
 	}
 }

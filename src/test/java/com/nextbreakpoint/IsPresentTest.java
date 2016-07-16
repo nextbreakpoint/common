@@ -27,6 +27,11 @@ public class IsPresentTest {
 	}
 
 	@Test
+	public void shouldReturnFalseWhenCallableThrowsException() {
+		assertFalse(Try.of(() -> { throw new Exception(); }).isPresent());
+	}
+
+	@Test
 	public void shouldReturnFalseWhenCallableReturnsNull() {
 		assertFalse(Try.of(() -> null).isPresent());
 	}
@@ -34,10 +39,5 @@ public class IsPresentTest {
 	@Test
 	public void shouldReturnTrueWhenCallableReturnsValue() {
 		assertTrue(Try.of(() -> "X").isPresent());
-	}
-
-	@Test
-	public void shouldReturnFalseWhenCallableThrowsException() {
-		assertFalse(Try.of(() -> { throw new Exception(); }).isPresent());
 	}
 }

@@ -25,6 +25,12 @@ public class ThrowIfFailureTest {
 	}
 
 	@Test
+	public void shouldThrowExceptionWhenCallableThrowsException() throws Exception {
+		exception.expect(Exception.class);
+		Try.of(() -> { throw new Exception(); }).throwIfFailure();
+	}
+
+	@Test
 	public void shouldNotThrowExceptionWhenCallableReturnsNull() throws Exception {
 		Try.of(() -> null).throwIfFailure();
 	}
@@ -32,11 +38,5 @@ public class ThrowIfFailureTest {
 	@Test
 	public void shouldNotThrowExceptionWhenCallableReturnsValue() throws Exception {
 		Try.of(() -> "X").throwIfFailure();
-	}
-
-	@Test
-	public void shouldThrowExceptionWhenCallableThrowsException() throws Exception {
-		exception.expect(Exception.class);
-		Try.of(() -> { throw new Exception(); }).throwIfFailure();
 	}
 }

@@ -7,9 +7,7 @@ import org.junit.rules.ExpectedException;
 import java.util.function.Consumer;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class IfPresentOrThrowTest {
 	@Rule
@@ -37,6 +35,13 @@ public class IfPresentOrThrowTest {
 	}
 
 	@Test
+	public void shouldThrowExceptionWhenCallableThrowsException() throws Exception {
+		exception.expect(Exception.class);
+		Consumer<Object> consumer = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).ifPresentOrThrow(consumer);
+	}
+
+	@Test
 	public void shouldNotCallConsumerWhenCallableReturnsNull() throws Exception {
 		Consumer<Object> consumer = mock(Consumer.class);
 		Try.of(() -> null).ifPresentOrThrow(consumer);
@@ -48,12 +53,5 @@ public class IfPresentOrThrowTest {
 		Consumer<String> consumer = mock(Consumer.class);
 		Try.of(() -> "X").ifPresentOrThrow(consumer);
 		verify(consumer, times(1)).accept(any());
-	}
-
-	@Test
-	public void shouldThrowExceptionWhenCallableThrowsException() throws Exception {
-		exception.expect(Exception.class);
-		Consumer<Object> consumer = mock(Consumer.class);
-		Try.of(() -> { throw new Exception(); }).ifPresentOrThrow(consumer);
 	}
 }

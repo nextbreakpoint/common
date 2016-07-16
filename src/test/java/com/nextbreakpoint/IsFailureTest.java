@@ -27,6 +27,11 @@ public class IsFailureTest {
 	}
 
 	@Test
+	public void shouldReturnTrueWhenCallableThrowsException() {
+		assertTrue(Try.of(() -> { throw new Exception(); }).isFailure());
+	}
+
+	@Test
 	public void shouldReturnFalseWhenCallableReturnsNull() {
 		assertFalse(Try.of(() -> null).isFailure());
 	}
@@ -34,10 +39,5 @@ public class IsFailureTest {
 	@Test
 	public void shouldReturnFalseWhenCallableReturnsValue() {
 		assertFalse(Try.of(() -> "X").isFailure());
-	}
-
-	@Test
-	public void shouldReturnTrueWhenCallableThrowsException() {
-		assertTrue(Try.of(() -> { throw new Exception(); }).isFailure());
 	}
 }
