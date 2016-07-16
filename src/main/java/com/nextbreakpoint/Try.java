@@ -89,8 +89,8 @@ public abstract class Try<V, E extends Exception> {
 
 	/**
 	 * Returns the value.
-	 * Throws NoSuchElementException if value not present.
 	 * @return the value
+	 * @throws NoSuchElementException if value not present.
 	 */
 	public abstract V get();
 
@@ -110,9 +110,9 @@ public abstract class Try<V, E extends Exception> {
 
 	/**
 	 * Returns the value if present or throws exception if failure.
-	 * Throws NoSuchElementException if value not present.
 	 * @return the value
 	 * @throws E the exception
+	 * @throws NoSuchElementException if value not present.
 	 */
 	public abstract V orThrow() throws E;
 
@@ -141,6 +141,7 @@ public abstract class Try<V, E extends Exception> {
 	 * @param func the function
 	 * @param <R> the result's value type
 	 * @return new instance
+	 * @throws NullPointerException if func is null.
 	 */
 	public abstract <R> Try<R, E> map(Function<V, R> func);
 
@@ -149,15 +150,25 @@ public abstract class Try<V, E extends Exception> {
 	 * @param func the function
 	 * @param <R> the result's value type
 	 * @return new instance
+	 * @throws NullPointerException if func is null.
 	 */
 	public abstract <R> Try<R, E> flatMap(Function<V, Try<R, E>> func);
 
 	/**
-	 * Creates new instance with alternative callable to use if failure.
+	 * Creates new instance which executes alternative callable if failure.
 	 * @param callable the callable
 	 * @return new instance
+	 * @throws NullPointerException if callable is null.
 	 */
 	public abstract Try<V, E> or(Callable<V> callable);
+
+	/**
+	 * Creates new instance which executes consecutive callable if success.
+	 * @param callable the callable
+	 * @return new instance
+	 * @throws NullPointerException if callable is null.
+	 */
+	public abstract Try<V, E> and(Callable<V> callable);
 
 	/**
 	 * Creates new instance with given consumer of success event.
@@ -178,6 +189,7 @@ public abstract class Try<V, E extends Exception> {
      * @param mapper the mapper
 	 * @param <X> the exception type
      * @return new instance
+	 * @throws NullPointerException if mapper is null.
      */
 	public abstract <X extends Exception> Try<V, X> mapper(Function<Exception, X> mapper);
 
@@ -185,6 +197,7 @@ public abstract class Try<V, E extends Exception> {
 	 * Creates new instance with given value filter.
 	 * @param filter the filter
 	 * @return new instance
+	 * @throws NullPointerException if filter is null.
 	 */
 	public abstract Try<V, E> filter(Predicate<Object> filter);
 
@@ -317,15 +330,23 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public <R> Try<R, E> map(Function<V, R> func) {
+			Objects.requireNonNull(func);
 			return new TryFailure<>(mapper, defaultFilter(), onSuccess, onFailure, exception);
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
+			Objects.requireNonNull(func);
 			return new TryFailure<>(mapper, defaultFilter(), onSuccess, onFailure, exception);
 		}
 
 		public Try<V, E> or(Callable<V> callable) {
-			return new TryCallable<>(mapper, defaultFilter(), onSuccess, onFailure, callable);
+			Objects.requireNonNull(callable);
+			return create(() -> orTry(onFailure, callable));
+		}
+
+		public Try<V, E> and(Callable<V> callable) {
+			Objects.requireNonNull(callable);
+			return new TryFailure<>(mapper, defaultFilter(), onSuccess, onFailure, exception);
 		}
 
 		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
@@ -346,6 +367,19 @@ public abstract class Try<V, E extends Exception> {
 
 		private void notifyEvent() {
 			Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(exception));
+		}
+
+		private <R> Try<R, E> create(Callable<R> callable) {
+			return new TryCallable<>(mapper, defaultFilter(), onSuccess, onFailure, callable);
+		}
+
+		private V call(Callable<V> callable) throws Exception {
+			return callable.call();
+		}
+
+		private V orTry(Consumer<Exception> onFailure, Callable<V> callable) throws Exception {
+			Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(exception));
+			return call(callable);
 		}
 	}
 
@@ -421,15 +455,23 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public <R> Try<R, E> map(Function<V, R> func) {
+			Objects.requireNonNull(func);
 			return create(() -> evaluate().map(func).orElse(null));
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
+			Objects.requireNonNull(func);
 			return create(() -> evaluate().map(func).orElseGet(() -> empty()).orThrow(null));
 		}
 
 		public Try<V, E> or(Callable<V> callable) {
+			Objects.requireNonNull(callable);
 			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, value);
+		}
+
+		public Try<V, E> and(Callable<V> callable) {
+			Objects.requireNonNull(callable);
+			return create(() -> andTry(onSuccess, callable));
 		}
 
 		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
@@ -462,6 +504,15 @@ public abstract class Try<V, E extends Exception> {
 
 		private void notifyEvent() {
 			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value)));
+		}
+
+		private V call(Callable<V> callable) throws Exception {
+			return callable.call();
+		}
+
+		private V andTry(Consumer<Optional<Object>> onSuccess, Callable<V> callable) throws Exception {
+			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value)));
+			return call(callable);
 		}
 	}
 
@@ -535,15 +586,23 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		public <R> Try<R, E> map(Function<V, R> func) {
+			Objects.requireNonNull(func);
 			return create(() -> evaluate().map(func).orElse(null));
 		}
 
 		public <R> Try<R, E> flatMap(Function<V, Try<R, E>> func) {
+			Objects.requireNonNull(func);
 			return create(() -> evaluate().map(func).orElseGet(() -> empty()).orThrow(null));
 		}
 
 		public Try<V, E> or(Callable<V> callable) {
-			return create(() -> orTry(callable));
+			Objects.requireNonNull(callable);
+			return create(() -> orTry(onFailure, callable));
+		}
+
+		public Try<V, E> and(Callable<V> callable) {
+			Objects.requireNonNull(callable);
+			return create(() -> andTry(onSuccess, callable));
 		}
 
 		public Try<V, E> onSuccess(Consumer<Optional<Object>> consumer) {
@@ -602,12 +661,19 @@ public abstract class Try<V, E extends Exception> {
 			return callable.call();
 		}
 
-		private V orTry(Callable<V> callable) throws Exception {
+		private V orTry(Consumer<Exception> onFailure, Callable<V> callable) throws Exception {
 			try {
 				return call();
 			} catch (Exception e) {
+				Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(e));
 				return call(callable);
 			}
+		}
+
+		private V andTry(Consumer<Optional<Object>> onSuccess, Callable<V> callable) throws Exception {
+			V value = call();
+			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value)));
+			return call(callable);
 		}
 	}
 }

@@ -162,10 +162,17 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void shouldNotCallSecondCallableWhenValueIsNull() throws Exception {
+	public void shouldNotCallSecondCallableForOrWhenValueIsNull() throws Exception {
 		Callable<Object> callable = mock(Callable.class);
 		Try.success(null).or(callable).isPresent();
 		verify(callable, times(0)).call();
+	}
+
+	@Test
+	public void shouldCallSecondCallableForAndWhenValueIsNull() throws Exception {
+		Callable<Object> callable = mock(Callable.class);
+		Try.success(null).and(callable).isPresent();
+		verify(callable, times(1)).call();
 	}
 
 	@Test
@@ -402,9 +409,16 @@ public class SuccessTest {
 	}
 
 	@Test
-	public void shouldNotCallSecondCallableWhenValueIsNotNull() throws Exception {
+	public void shouldNotCallSecondCallableForOrWhenValueIsNotNull() throws Exception {
 		Callable<String> callable = mock(Callable.class);
 		Try.success("X").or(callable).isPresent();
 		verify(callable, times(0)).call();
+	}
+
+	@Test
+	public void shouldCallSecondCallableForAndWhenValueIsNotNull() throws Exception {
+		Callable<String> callable = mock(Callable.class);
+		Try.success("X").and(callable).isPresent();
+		verify(callable, times(1)).call();
 	}
 }

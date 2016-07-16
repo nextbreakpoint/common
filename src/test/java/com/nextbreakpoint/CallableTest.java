@@ -477,34 +477,127 @@ public class CallableTest {
 	}
 
 	@Test
-	public void shouldNotCallSecondCallableWhenFirstCallableReturnsValue() throws Exception {
+	public void shouldNotCallSecondCallableForOrWhenFirstCallableReturnsValue() throws Exception {
 		Callable<String> callable = mock(Callable.class);
-		Try.of(() -> "X").or(callable);
+		Try.of(() -> "X").or(callable).isPresent();
 		verify(callable, times(0)).call();
 	}
 
 	@Test
-	public void shouldReturnValueOfFirstCallableWhenFirstCallableReturnsValue() {
+	public void shouldCallSecondCallableForAndWhenFirstCallableReturnsValue() throws Exception {
 		Callable<String> callable = mock(Callable.class);
-		assertEquals("X", Try.of(() -> "X").or(callable).get());
+		Try.of(() -> "X").and(callable).isPresent();
+		verify(callable, times(1)).call();
 	}
 
 	@Test
-	public void shouldCallSecondCallableWhenFirstCallableThrowsException() throws Exception {
+	public void shouldReturnValueOfFirstCallableForOrWhenFirstCallableReturnsValue() {
+		assertEquals("X", Try.of(() -> "X").or(() -> "Y").get());
+	}
+
+	@Test
+	public void shouldReturnValueOfSecondCallableForAndWhenFirstCallableReturnsValue() {
+		assertEquals("Y", Try.of(() -> "X").and(() -> "Y").get());
+	}
+
+	@Test
+	public void shouldCallSecondCallableForOrWhenFirstCallableThrowsException() throws Exception {
 		Callable<Object> callable = mock(Callable.class);
 		Try.of(() -> { throw new Exception(); }).or(callable).isPresent();
 		verify(callable, times(1)).call();
 	}
 
 	@Test
-	public void shouldReturnValueOfSecondCallableWhenFirstCallableThrowsExceptionAndSecondCallableReturnsValue() {
-		Callable<String> callable = mock(Callable.class);
+	public void shouldNotCallSecondCallableForAndWhenFirstCallableThrowsException() throws Exception {
+		Callable<Object> callable = mock(Callable.class);
+		Try.of(() -> { throw new Exception(); }).and(callable).isPresent();
+		verify(callable, times(0)).call();
+	}
+
+	@Test
+	public void shouldReturnValueOfSecondCallableForOrWhenFirstCallableThrowsExceptionAndSecondCallableReturnsValue() {
 		assertEquals("Y", Try.of(() -> { throw new Exception(); }).or(() -> "Y").get());
 	}
 
 	@Test
-	public void shouldReturnFailureWhenAllCallablesThrowException() {
+	public void shouldNotReturnValueForAndWhenFirstCallableThrowsExceptionAndSecondCallableReturnsValue() {
+		assertFalse(Try.of(() -> { throw new Exception(); }).and(() -> "Y").isPresent());
+	}
+
+	@Test
+	public void shouldReturnFailureForOrWhenAllCallablesThrowException() {
 		assertTrue(Try.of(() -> { throw new Exception(); }).or(() -> { throw new Exception(); }).isFailure());
+	}
+
+	@Test
+	public void shouldReturnFailureForAndWhenAllCallablesThrowException() {
+		assertTrue(Try.of(() -> { throw new Exception(); }).and(() -> { throw new Exception(); }).isFailure());
+	}
+
+	@Test
+	public void shouldCallConsumerForOrWhenFirstCallableThrowsException() {
+		Consumer<Exception> consumer1 = mock(Consumer.class);
+		Consumer<Exception> consumer2 = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).onFailure(consumer1).or(() -> "X").onFailure(consumer2).isPresent();
+		verify(consumer1, times(1)).accept(any(Exception.class));
+		verify(consumer2, times(0)).accept(any(Exception.class));
+	}
+
+	@Test
+	public void shouldNotCallConsumerForAndWhenFirstCallableThrowsException() {
+		Consumer<Optional<Object>> consumer1 = mock(Consumer.class);
+		Consumer<Optional<Object>> consumer2 = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).onSuccess(consumer1).and(() -> "X").onSuccess(consumer2).isPresent();
+		verify(consumer1, times(0)).accept(any(Optional.class));
+		verify(consumer2, times(0)).accept(any(Optional.class));
+	}
+
+	@Test
+	public void shouldCallConsumerForOrWhenSecondCallableThrowsException() {
+		Consumer<Exception> consumer = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).or(() -> { throw new Exception(); }).onFailure(consumer).isFailure();
+		verify(consumer, times(1)).accept(any(Exception.class));
+	}
+
+	@Test
+	public void shouldCallConsumerForAndWhenSecondCallableThrowsException() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).and(() -> { throw new Exception(); }).onSuccess(consumer).isFailure();
+		verify(consumer, times(0)).accept(any(Optional.class));
+	}
+
+	@Test
+	public void shouldCallConsumerForOrWhenFirstAndSecondCallableThrowsException() {
+		Consumer<Exception> consumer1 = mock(Consumer.class);
+		Consumer<Exception> consumer2 = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).onFailure(consumer1)
+			.or(() -> { throw new Exception(); }).onFailure(consumer2).isFailure();
+		verify(consumer1, times(1)).accept(any(Exception.class));
+		verify(consumer2, times(1)).accept(any(Exception.class));
+	}
+
+	@Test
+	public void shouldCallConsumerForAndWhenFirstAndSecondCallableThrowsException() {
+		Consumer<Optional<Object>> consumer1 = mock(Consumer.class);
+		Consumer<Optional<Object>> consumer2 = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).onSuccess(consumer1)
+				.and(() -> { throw new Exception(); }).onSuccess(consumer2).isFailure();
+		verify(consumer1, times(0)).accept(any(Optional.class));
+		verify(consumer2, times(0)).accept(any(Optional.class));
+	}
+
+	@Test
+	public void shouldCallConsumerForOrTwoTimesWhenFirstAndSecondCallableThrowsException() {
+		Consumer<Exception> consumer = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).onFailure(consumer).or(() -> { throw new Exception(); }).isFailure();
+		verify(consumer, times(2)).accept(any(Exception.class));
+	}
+
+	@Test
+	public void shouldCallConsumerForAndTwoTimesWhenFirstAndSecondCallableThrowsException() {
+		Consumer<Optional<Object>> consumer = mock(Consumer.class);
+		Try.of(() -> { throw new Exception(); }).onSuccess(consumer).and(() -> { throw new Exception(); }).isFailure();
+		verify(consumer, times(0)).accept(any(Optional.class));
 	}
 
 	@Test

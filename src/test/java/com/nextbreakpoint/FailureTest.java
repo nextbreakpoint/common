@@ -165,11 +165,19 @@ public class FailureTest {
 	}
 
 	@Test
-	public void shouldCallSecondCallableWhenValueIsNull() throws Exception {
+	public void shouldCallSecondCallableForOr() throws Exception {
 		Callable<Object> callable = mock(Callable.class);
 		when(callable.call()).thenReturn("X");
 		Try.failure(new Exception()).or(callable).isFailure();
 		verify(callable, times(1)).call();
+	}
+
+	@Test
+	public void shouldNotCallSecondCallableForAnd() throws Exception {
+		Callable<Object> callable = mock(Callable.class);
+		when(callable.call()).thenReturn("X");
+		Try.failure(new Exception()).and(callable).isFailure();
+		verify(callable, times(0)).call();
 	}
 
 	@Test
