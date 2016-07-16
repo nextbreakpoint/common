@@ -1,8 +1,6 @@
 package com.nextbreakpoint;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import java.util.function.Consumer;
 
@@ -10,9 +8,6 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
 
 public class OnFailureTest {
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void shouldNotThrowExceptionWhenConsumerIsNull() {
 		Try.success("X").onFailure(null).get();

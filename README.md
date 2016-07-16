@@ -1,4 +1,4 @@
-# Try 2.0.1
+# Try 2.0.2
 
 Try implements a monad for handling checked and unchecked exceptions.
  
@@ -40,7 +40,7 @@ If you are using Maven, add a dependency in your POM:
     <dependency>
         <groupId>com.nextbreakpoint</groupId>
         <artifactId>com.nextbreakpoint.try</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.2</version>
     </dependency>
 
 If you are using other tools, check in the documentation how to install an artifact.
@@ -205,6 +205,29 @@ Use and() to provide an consecutive callable to invoke if success:
 
     Try.of(() -> { throw new Exception(); }).and(() -> "Y").isFailure(); // Returns true    
 
+## Forcing execution of operations   
+
+The important thing to understand is that by default operations are chained and executed when invoking a terminal operation.
+
+For instance in this code the callable is invoked two times because isPresent() and get() are two terminal operations:
+
+    Try<> trySomething = Try.of(() -> "X");
+    if (trySomething.isPresent()) {
+        System.out.println(trySomething.get());
+    }
+
+To avoid invoking the callable two times, use always one single terminal operation:
+
+    Try<> trySomething = Try.of(() -> "X");
+    trySomething.ifPresent(v -> System.out.println(v));
+
+When it is not possible to use one single terminal operation, use execute() to create a not lazy instance:
+
+    Try<> trySomething = Try.of(() -> "X").execute();
+    if (trySomething.isPresent()) {
+        System.out.println(trySomething.get());
+    }
+    
 ## Complete example
 
 Given the program:

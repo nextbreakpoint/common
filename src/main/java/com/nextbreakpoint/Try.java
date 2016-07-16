@@ -201,12 +201,18 @@ public abstract class Try<V, E extends Exception> {
 	 */
 	public abstract Try<V, E> filter(Predicate<Object> filter);
 
-    /**
-     * Creates new instance with given callable.
-     * @param callable the callable
+	/**
+	 * Creates not lazy instance. Executes code if needed.
+	 * @return new instance
+	 */
+	public abstract Try<V, E> execute();
+
+	/**
+	 * Creates new instance with given callable.
+	 * @param callable the callable
 	 * @param <R> the result's value type
-     * @return new instance
-     */
+	 * @return new instance
+	 */
     public static <R> Try<R, Exception> of(Callable<R> callable) {
 		return new TryCallable<>(defaultMapper(), defaultFilter(), callable);
     }
@@ -362,6 +368,10 @@ public abstract class Try<V, E extends Exception> {
 			return new TryFailure<>(mapper, filter, onSuccess, onFailure, exception);
 		}
 
+		public Try<V, E> execute() {
+			return this;
+		}
+
 		private void notifyEvent() {
 			Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(exception));
 		}
@@ -485,6 +495,10 @@ public abstract class Try<V, E extends Exception> {
 
 		public Try<V, E> filter(Predicate<Object> filter) {
 			return new TrySuccess<>(mapper, filter, onSuccess, onFailure, value);
+		}
+
+		public Try<V, E> execute() {
+			return this;
 		}
 
 		private Optional<V> evaluate() {
@@ -618,7 +632,7 @@ public abstract class Try<V, E extends Exception> {
 			return new TryCallable<>(mapper, filter, onSuccess, onFailure, callable);
 		}
 
-		private Try<V, E> execute() {
+		public Try<V, E> execute() {
 			try {
 				return create(evaluate().orElse(null));
 			} catch (Exception e) {

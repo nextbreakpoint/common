@@ -1,8 +1,6 @@
 package com.nextbreakpoint;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -12,9 +10,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class OrTest {
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void shouldCallSecondCallableWhenFailure() throws Exception {
 		Callable<Object> callable = mock(Callable.class);
