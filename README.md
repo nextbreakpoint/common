@@ -1,4 +1,4 @@
-# Try 2.0.0
+# Try 2.0.1
 
 Try implements a monad for handling checked and unchecked exceptions.
  
@@ -40,26 +40,32 @@ If you are using Maven, add a dependency in your POM:
     <dependency>
         <groupId>com.nextbreakpoint</groupId>
         <artifactId>com.nextbreakpoint.try</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
     </dependency>
 
 If you are using other tools, check the documentation how to install an artifact.
   
 ## Getting value
 
-Use get() or orElse() to get the value returned by a callable: 
+Use get(), orElse(), orElseGet() to get the value returned by a callable: 
 
     Try.of(() -> "X").get(); // Returns X
     
     Try.of(() -> "X").orElse("Y"); // Returns X
     
+    Try.of(() -> "X").orElseGet(() -> "Y"); // Returns X
+    
     Try.of(() -> null).get(); // Throws NoSuchElementException
     
     Try.of(() -> null).orElse("Y"); // Returns Y
     
+    Try.of(() -> null).orElseGet(() -> "Y"); // Returns Y
+    
     Try.of(() -> { throw new IOException(); }).get(); // Throws NoSuchElementException
     
     Try.of(() -> { throw new IOException(); }).orElse("Y"); // Returns Y
+
+    Try.of(() -> { throw new IOException(); }).orElseGet(() -> "Y"); // Returns Y
 
 Use orThrow() to get the value or re-throw the exception: 
 
@@ -181,13 +187,23 @@ Use mapper() to change type of exception:
        return e -> (e instanceof IOException) ? (IOException)e : new IOException("IO Error", e);
     }
 
-## Providing alternative
+## Executing consecutive or alternative operations 
 
-Use or() to provide an alternative callable to use if failure:
+Use or() to provide an alternative callable to invoke if failure:
 
     Try.of(() -> "X").or(() -> "Y").get(); // Returns X  
       
     Try.of(() -> { throw new Exception(); }).or(() -> "Y").get(); // Returns Y    
+
+    Try.of(() -> { throw new Exception(); }).or(() -> "Y").isFailure(); // Returns false    
+
+Use and() to provide an consecutive callable to invoke if success:
+
+    Try.of(() -> "X").and(() -> "Y").get(); // Returns Y  
+      
+    Try.of(() -> { throw new Exception(); }).and(() -> "Y").orElse(null); // Returns null    
+
+    Try.of(() -> { throw new Exception(); }).and(() -> "Y").isFailure(); // Returns true    
 
 ## Complete example
 
