@@ -1,16 +1,11 @@
 package com.nextbreakpoint;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class OrElseGetTest {
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void shouldReturnSupplierValueWhenFailure() {
 		assertEquals("X", Try.failure(new Exception()).orElseGet(() -> "X"));
