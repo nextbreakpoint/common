@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.nextbreakpoint</groupId>
 	<artifactId>com.nextbreakpoint.try</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1</version>
 	<packaging>jar</packaging>
 	<name>Try</name>
 	<description>Try implements a monad for handling checked and unchecked exceptions</description>
@@ -165,7 +165,7 @@
 			<distributionManagement>
 				<repository>
 					<id>bintray</id>
-					<url>https://api.bintray.com/maven/${bintrayAccount}/maven/${project.artifactId};publish=1</url>
+					<url>https://api.bintray.com/maven/${bintrayAccount}/maven/${project.artifactId}/;publish=1</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -204,14 +204,14 @@
 					<plugin>
 						<groupId>com.nextbreakpoint</groupId>
 						<artifactId>twitter-maven-plugin</artifactId>
-						<version>1.0.0</version>
+						<version>1.0.1</version>
 						<configuration>
 							<debug>false</debug>
 							<oauthConsumerKey>${consumerKey}</oauthConsumerKey>
 							<oauthConsumerSecret>${consumerSecret}</oauthConsumerSecret>
 							<oauthAccessToken>${accessToken}</oauthAccessToken>
 							<oauthAccessTokenSecret>${accessTokenSecret}</oauthAccessTokenSecret>
-							<status>Version ${project.version} of ${project.name} has been released! Grab it from #Maven Central Repository, #Bintray or #GitHub! ${project.url}</status>
+							<status>Version ${project.version} of ${project.name} has been released! ${project.url}</status>
 						</configuration>
 					</plugin>
 				</plugins>
