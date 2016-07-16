@@ -15,6 +15,11 @@ public class OnSuccessTest {
 	public ExpectedException exception = ExpectedException.none();
 
 	@Test
+	public void shouldNotThrowExceptionWhenConsumerIsNull() {
+		Try.success("X").onSuccess(null).get();
+	}
+
+	@Test
 	public void shouldNotCallSuccessConsumerWhenFailure() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).onSuccess(consumer).isFailure();

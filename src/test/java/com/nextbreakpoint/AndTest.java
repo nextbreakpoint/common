@@ -67,7 +67,7 @@ public class AndTest {
 	}
 
 	@Test
-	public void shouldNotCallConsumerWhenFirstCallableThrowsException() {
+	public void shouldNotCallConsumersWhenFirstCallableThrowsException() {
 		Consumer<Optional<Object>> consumer1 = mock(Consumer.class);
 		Consumer<Optional<Object>> consumer2 = mock(Consumer.class);
 		Try.of(() -> { throw new Exception(); }).onSuccess(consumer1).and(() -> "X").onSuccess(consumer2).isPresent();
@@ -93,7 +93,7 @@ public class AndTest {
 	}
 
 	@Test
-	public void shouldCallConsumerTwoTimesWhenFirstAndSecondCallablesThrowException() {
+	public void shouldNotCallConsumerWhenFirstAndSecondCallablesThrowException() {
 		Consumer<Optional<Object>> consumer = mock(Consumer.class);
 		Try.of(() -> { throw new Exception(); }).onSuccess(consumer).and(() -> { throw new Exception(); }).isFailure();
 		verify(consumer, times(0)).accept(any(Optional.class));

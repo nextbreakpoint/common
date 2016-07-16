@@ -232,10 +232,8 @@ public abstract class Try<V, E extends Exception> {
 	}
 
 	private Try(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccess, Consumer<Exception> onFailure) {
-		Objects.requireNonNull(mapper);
-		Objects.requireNonNull(filter);
-		this.mapper = mapper;
-		this.filter = filter;
+		this.mapper = Objects.requireNonNull(mapper);
+		this.filter = Objects.requireNonNull(filter);
 		this.onSuccess = onSuccess;
 		this.onFailure = onFailure;
 	}
@@ -251,10 +249,9 @@ public abstract class Try<V, E extends Exception> {
 	private static class TryFailure<V, E extends Exception> extends Try<V, E> {
 		private final E exception;
 
-		public TryFailure(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccessHandler, Consumer<Exception> onFailureHandler, E exception) {
-			super(mapper, filter, onSuccessHandler, onFailureHandler);
-			Objects.requireNonNull(exception);
-			this.exception = exception;
+		public TryFailure(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccess, Consumer<Exception> onFailure, E exception) {
+			super(mapper, filter, onSuccess, onFailure);
+			this.exception = Objects.requireNonNull(exception);
 		}
 
 		public TryFailure(Function<Exception, E> mapper, Predicate<Object> filter, E exception) {
@@ -386,8 +383,8 @@ public abstract class Try<V, E extends Exception> {
 	private static class TrySuccess<V, E extends Exception> extends Try<V, E> {
 		private final V value;
 
-		public TrySuccess(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccessHandler, Consumer<Exception> onFailureHandler, V value) {
-			super(mapper, filter, onSuccessHandler, onFailureHandler);
+		public TrySuccess(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccess, Consumer<Exception> onFailure, V value) {
+			super(mapper, filter, onSuccess, onFailure);
 			this.value = value;
 		}
 
@@ -520,10 +517,9 @@ public abstract class Try<V, E extends Exception> {
 	private static class TryCallable<V, E extends Exception> extends Try<V, E> {
 		private final Callable<V> callable;
 
-		public TryCallable(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccessHandler, Consumer<Exception> onFailureHandler, Callable<V> callable) {
-			super(mapper, filter, onSuccessHandler, onFailureHandler);
-			Objects.requireNonNull(callable);
-			this.callable = callable;
+		public TryCallable(Function<Exception, E> mapper, Predicate<Object> filter, Consumer<Optional<Object>> onSuccess, Consumer<Exception> onFailure, Callable<V> callable) {
+			super(mapper, filter, onSuccess, onFailure);
+			this.callable = Objects.requireNonNull(callable);
 		}
 
 		public TryCallable(Function<Exception, E> mapper, Predicate<Object> filter, Callable<V> callable) {
@@ -624,9 +620,9 @@ public abstract class Try<V, E extends Exception> {
 
 		private Try<V, E> execute() {
 			try {
-				return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, evaluate().orElse(null));
+				return create(evaluate().orElse(null));
 			} catch (Exception e) {
-				return new TryFailure<>(mapper, defaultFilter(), onSuccess, onFailure, mapper.apply(e));
+				return create(mapper.apply(e));
 			}
 		}
 
@@ -642,7 +638,7 @@ public abstract class Try<V, E extends Exception> {
 			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, null);
 		}
 
-		private <R> Try<R, E> fail(E exception) {
+		private <R> Try<R, E> create(E exception) {
 			return new TryFailure<>(mapper, defaultFilter(), onSuccess, onFailure, exception);
 		}
 

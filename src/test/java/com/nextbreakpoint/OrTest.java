@@ -45,7 +45,7 @@ public class OrTest {
 	}
 
 	@Test
-	public void shouldReturnValueOfFirstCallableWhenFirstCallableReturnsValue() {
+	public void shouldReturnValueOfFirstCallableWhenFirstCallableReturnsValueAndSecondCallableReturnsValue() {
 		assertEquals("X", Try.of(() -> "X").or(() -> "Y").get());
 	}
 
@@ -83,7 +83,7 @@ public class OrTest {
 	}
 
 	@Test
-	public void shouldCallConsumerWhenFirstAndSecondCallableThrowsException() {
+	public void shouldCallConsumersWhenFirstAndSecondCallableThrowException() {
 		Consumer<Exception> consumer1 = mock(Consumer.class);
 		Consumer<Exception> consumer2 = mock(Consumer.class);
 		Try.of(() -> { throw new Exception(); }).onFailure(consumer1)

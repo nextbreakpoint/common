@@ -14,6 +14,11 @@ public class OnFailureTest {
 	public ExpectedException exception = ExpectedException.none();
 
 	@Test
+	public void shouldNotThrowExceptionWhenConsumerIsNull() {
+		Try.success("X").onFailure(null).get();
+	}
+
+	@Test
 	public void shouldCallFailureConsumerWhenFailure() {
 		Consumer<Exception> consumer = mock(Consumer.class);
 		Try.failure(new Exception()).onFailure(consumer).isFailure();

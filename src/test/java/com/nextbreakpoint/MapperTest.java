@@ -17,9 +17,9 @@ public class MapperTest {
 	public ExpectedException exception = ExpectedException.none();
 
 	@Test
-	public void shouldThrowNullPointerExceptionWhenFailureAndMapperIsNull() {
+	public void shouldThrowNullPointerExceptionWhenMapperIsNull() {
 		exception.expect(NullPointerException.class);
-		Try.failure(new Exception()).mapper(null);
+		Try.success("X").mapper(null);
 	}
 
 	@Test
