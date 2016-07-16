@@ -341,7 +341,7 @@ public abstract class Try<V, E extends Exception> {
 
 		public Try<V, E> or(Callable<V> callable) {
 			Objects.requireNonNull(callable);
-			return create(() -> orTry(onFailure, callable));
+			return create(() -> orTry(onFailure, callable, mapper));
 		}
 
 		public Try<V, E> and(Callable<V> callable) {
@@ -377,8 +377,8 @@ public abstract class Try<V, E extends Exception> {
 			return callable.call();
 		}
 
-		private V orTry(Consumer<Exception> onFailure, Callable<V> callable) throws Exception {
-			Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(exception));
+		private V orTry(Consumer<Exception> onFailure, Callable<V> callable, Function<Exception, E> mapper) throws Exception {
+			Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(mapper.apply(exception)));
 			return call(callable);
 		}
 	}
@@ -511,7 +511,8 @@ public abstract class Try<V, E extends Exception> {
 		}
 
 		private V andTry(Consumer<Optional<Object>> onSuccess, Callable<V> callable) throws Exception {
-			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value)));
+			Optional<V> value = evaluate();
+			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value.orElse(null))));
 			return call(callable);
 		}
 	}
@@ -597,7 +598,7 @@ public abstract class Try<V, E extends Exception> {
 
 		public Try<V, E> or(Callable<V> callable) {
 			Objects.requireNonNull(callable);
-			return create(() -> orTry(onFailure, callable));
+			return create(() -> orTry(onFailure, callable, mapper));
 		}
 
 		public Try<V, E> and(Callable<V> callable) {
@@ -661,18 +662,18 @@ public abstract class Try<V, E extends Exception> {
 			return callable.call();
 		}
 
-		private V orTry(Consumer<Exception> onFailure, Callable<V> callable) throws Exception {
+		private V orTry(Consumer<Exception> onFailure, Callable<V> callable, Function<Exception, E> mapper) throws Exception {
 			try {
 				return call();
 			} catch (Exception e) {
-				Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(e));
+				Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(mapper.apply(e)));
 				return call(callable);
 			}
 		}
 
 		private V andTry(Consumer<Optional<Object>> onSuccess, Callable<V> callable) throws Exception {
-			V value = call();
-			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value)));
+			Optional<V> value = evaluate();
+			Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value.orElse(null))));
 			return call(callable);
 		}
 	}
