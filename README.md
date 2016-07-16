@@ -43,7 +43,7 @@ If you are using Maven, add a dependency in your POM:
         <version>2.0.1</version>
     </dependency>
 
-If you are using other tools, check the documentation how to install an artifact.
+If you are using other tools, check how to install an artifact in the documentation.
   
 ## Getting value
 
