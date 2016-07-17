@@ -43,9 +43,47 @@ If you are using Maven, add a dependency in your POM:
         <version>2.0.2</version>
     </dependency>
 
-If you are using other tools, check in the documentation how to install an artifact.
+If you are using other tools, please consult tool's documentation.
   
-## Getting value
+## License
+
+Try is distributed under the terms of BSD 3-Clause License.
+
+    Copyright (c) 2016, Andrea Medeghini
+    All rights reserved.
+    
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+    
+    * Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+    
+    * Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+    
+    * Neither the name of Try nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+    
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## Documentation
+
+Try monad is quite similar to Optional. The difference is that Try not only has a value, but also it has two states, success and failure. Also Try implements lazy execution and in that sense it is similar to Stream, but Try allows to force the execution when it is required.       
+  
+Continue reading for general instruction. Please refer to javadocs for complete documentation.   
+
+### Getting value
 
 Use get(), orElse(), orElseGet() to get the value returned by a callable: 
 
@@ -81,7 +119,7 @@ Use orThrow() to get the value or re-throw the exception:
     
     Try.of(() -> { throw new IOException(); }).orThrow("Y"); // Throws IOException
 
-## Checking value
+### Checking value
 
 Use isPresent(), ifPresent(), ifPresentOrThrow() to conditionally execute code: 
 
@@ -103,7 +141,7 @@ Use isPresent(), ifPresent(), ifPresentOrThrow() to conditionally execute code:
     
     Try.of(() -> { throw new Exception(); }).ifPresentOrThrow(consumer); // Throws Exception
 
-## Checking state
+### Checking state
 
 Use isSuccess(), isFailure(), ifSuccess() or ifFailure() to conditionally execute code: 
 
@@ -131,7 +169,7 @@ Use isSuccess(), isFailure(), ifSuccess() or ifFailure() to conditionally execut
     
     Try.of(() -> { throw new Exception(); }).ifFailure(consumer); // Invokes the consumer    
 
-## Receiving events
+### Receiving events
 
 Use onSuccess() and onFailure() to receive events:
   
@@ -147,7 +185,7 @@ Use onSuccess() and onFailure() to receive events:
     
     Try.of(() -> { throw new Exception(); }).onFailure(consumer).orElse(null); // Invokes the consumer
 
-## Mapping and filtering value
+### Mapping and filtering value
 
 Use map() or flatMap() to transform the value:
 
@@ -173,7 +211,7 @@ Use filter() to filter the value:
     
     Try.of(() -> { throw new Exception(); }).filter(v -> true).isPresent(); // Returns false
 
-## Remapping exception
+### Remapping exception
 
 Use mapper() to change type of exception:
 
@@ -187,7 +225,7 @@ Use mapper() to change type of exception:
        return e -> (e instanceof IOException) ? (IOException)e : new IOException("IO Error", e);
     }
 
-## Executing consecutive or alternative operations 
+### Executing consecutive or alternative operations 
 
 Use or() to provide an alternative callable to invoke if failure:
 
@@ -205,7 +243,7 @@ Use and() to provide an consecutive callable to invoke if success:
 
     Try.of(() -> { throw new Exception(); }).and(() -> "Y").isFailure(); // Returns true    
 
-## Forcing execution of operations   
+### Forcing execution of operations   
 
 The important thing to understand is that by default operations are chained and executed when invoking a terminal operation.
 
