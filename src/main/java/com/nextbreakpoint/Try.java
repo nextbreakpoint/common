@@ -634,9 +634,13 @@ public abstract class Try<V, E extends Exception> {
 
 		public Try<V, E> execute() {
 			try {
-				return create(evaluate().orElse(null));
+				V value = evaluate().orElse(null);
+				Optional.ofNullable(onSuccess).ifPresent(consumer -> consumer.accept(Optional.ofNullable(value)));
+				return createTerminal(value);
 			} catch (Exception e) {
-				return create(mapper.apply(e));
+				E t = mapper.apply(e);
+				Optional.ofNullable(onFailure).ifPresent(consumer -> consumer.accept(t));
+				return createTerminal(t);
 			}
 		}
 
@@ -652,16 +656,16 @@ public abstract class Try<V, E extends Exception> {
 			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, null);
 		}
 
-		private <R> Try<R, E> create(E exception) {
-			return new TryFailure<>(mapper, defaultFilter(), onSuccess, onFailure, exception);
-		}
-
-		private <R> Try<R, E> create(R value) {
-			return new TrySuccess<>(mapper, defaultFilter(), onSuccess, onFailure, value);
-		}
-
 		private <R> Try<R, E> create(Callable<R> callable) {
 			return new TryCallable<>(mapper, defaultFilter(), onSuccess, onFailure, callable);
+		}
+
+		private <R> Try<R, E> createTerminal(E exception) {
+			return new TryFailure<>(mapper, defaultFilter(), null, null, exception);
+		}
+
+		private <R> Try<R, E> createTerminal(R value) {
+			return new TrySuccess<>(mapper, defaultFilter(), null, null, value);
 		}
 
 		private V call() throws Exception {

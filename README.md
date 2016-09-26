@@ -1,4 +1,4 @@
-# Try 2.0.2
+# Try 2.0.3
 
 Try implements a monad for handling checked and unchecked exceptions.
  
