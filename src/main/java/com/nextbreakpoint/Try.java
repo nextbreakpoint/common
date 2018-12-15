@@ -1,7 +1,7 @@
 /*
  * This file is part of Try
- * 
- * Copyright (c) 2016, Andrea Medeghini
+ *
+ * Copyright (c) 2016-2018, Andrea Medeghini
  * All rights reserved.
  */
 package com.nextbreakpoint;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 /**
  * Try implements a monad for handling checked and unchecked exceptions.
- * 
+ *
  * @author Andrea Medeghini
  *
  * @param <V> the type of returned value
@@ -46,13 +46,13 @@ public abstract class Try<V, E extends Exception> {
 
 	/**
 	 * Returns true if exception occurred.
-	 * @return true when exception if present 
+	 * @return true when exception is present
 	 */
 	public abstract boolean isFailure();
 
 	/**
 	 * Returns true if no exception occurred.
-	 * @return true when exception if not present
+	 * @return true when exception is not present
 	 */
 	public abstract boolean isSuccess();
 
@@ -321,7 +321,7 @@ public abstract class Try<V, E extends Exception> {
 			notifyEvent();
 			throw exception;
 	    }
-		
+
 		public Optional<V> value() {
 			notifyEvent();
 			return Optional.empty();
@@ -451,7 +451,7 @@ public abstract class Try<V, E extends Exception> {
 		public V orThrow(V value) throws E {
 	        return value().orElse(value);
 	    }
-		
+
 		public Optional<V> value() {
 			notifyEvent();
 			return evaluate();
