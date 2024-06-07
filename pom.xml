@@ -6,7 +6,7 @@
 	<version>3.0.0</version>
 	<packaging>jar</packaging>
 	<name>NextBreakpoint Common</name>
-	<description>Common is a library which implement useful types for writing code in an elegant and concise style</description>
+	<description>Common is a library which implements useful types for writing code in an elegant and concise style</description>
 	<url>https://github.com/nextbreakpoint/common</url>
 	<licenses>
 		<license>
