@@ -1,6 +1,6 @@
 # Common 3.0.0
 
-Common is a library which implement useful types for writing code in an elegant and concise style.
+Common is a library which implements useful types for writing code in an elegant and concise style.
 
 ## License
 
