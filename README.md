@@ -43,7 +43,7 @@ If you are using Maven, add the following dependency in your POM:
     <dependency>
         <groupId>com.nextbreakpoint</groupId>
         <artifactId>com.nextbreakpoint.common</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
     </dependency>
 
 ## Documentation
