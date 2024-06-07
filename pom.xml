@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.nextbreakpoint</groupId>
-	<artifactId>com.nextbreakpoint.try4java</artifactId>
-	<version>2.0.4</version>
+	<artifactId>com.nextbreakpoint.common</artifactId>
+	<version>3.0.0</version>
 	<packaging>jar</packaging>
-	<name>Try</name>
-	<description>Try implements a monad for handling checked and unchecked exceptions</description>
-	<url>https://github.com/nextbreakpoint/try</url>
+	<name>NextBreakpoint Common</name>
+	<description>Common is a library which implement useful types for writing code in an elegant and concise style</description>
+	<url>https://github.com/nextbreakpoint/common</url>
 	<licenses>
 		<license>
 			<name>BSD 3</name>
@@ -21,19 +21,120 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:git:git@github.com:nextbreakpoint/try.git</connection>
-		<developerConnection>scm:git:git@github.com:nextbreakpoint/try.git</developerConnection>
-		<url>git@github.com:nextbreakpoint/try.git</url>
+		<connection>scm:git:git@github.com:nextbreakpoint/common.git</connection>
+		<developerConnection>scm:git:git@github.com:nextbreakpoint/common.git</developerConnection>
+		<url>git@github.com:nextbreakpoint/common.git</url>
 	</scm>
 	<properties>
+		<java.version>21</java.version>
+		<java.release>21</java.release>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<junit.version>5.10.2</junit.version>
+		<assertj.version>3.25.3</assertj.version>
+		<mockito.version>5.12.0</mockito.version>
+		<maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+		<maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+		<maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+		<maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
+		<maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
+		<maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+		<maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
+		<versions-maven-plugin.version>2.16.2</versions-maven-plugin.version>
+		<nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+		<github-release-plugin.version>1.6.0</github-release-plugin.version>
+		<twitter-maven-plugin.version>1.0.1</twitter-maven-plugin.version>
+		<maven.version>3.6</maven.version>
 	</properties>
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<version>${maven-toolchains-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${maven-jar-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven-source-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${maven-javadoc-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>${maven-enforcer-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>${versions-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${maven-surefire-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>${nexus-staging-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>com.nextbreakpoint</groupId>
+					<artifactId>twitter-maven-plugin</artifactId>
+					<version>${twitter-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>de.jutzig</groupId>
+					<artifactId>github-release-plugin</artifactId>
+					<version>${github-release-plugin.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-toolchains-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<toolchains>
+						<jdk>
+							<version>[${java.version},)</version>
+						</jdk>
+					</toolchains>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -46,7 +147,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -58,48 +158,119 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-versions</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>${maven.version}</version>
+								</requireMavenVersion>
+								<requireJavaVersion>
+									<version>${java.version}</version>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.16</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader>
+					<argLine>@{argLine}</argLine>
+					<forkCount>0</forkCount>
+					<properties>
+						<configurationParameters>
+							junit.jupiter.execution.parallel.enabled = true
+							junit.jupiter.execution.parallel.mode.default = same_thread
+							junit.jupiter.execution.parallel.mode.classes.default = concurrent
+							junit.jupiter.execution.parallel.config.strategy = fixed
+							junit.jupiter.execution.parallel.config.fixed.parallelism = 5
+						</configurationParameters>
+					</properties>
 					<includes>
-						<include>**/*.java</include>
+						<include>**/*Test.java</include>
 					</includes>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit-platform</artifactId>
+						<version>${maven-surefire-plugin.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 			  <groupId>org.apache.maven.plugins</groupId>
 			  <artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.0</version>
-			  <configuration>
-			    <archive>
-			      <manifestEntries>
-			        <Automatic-Module-Name>com.nextbreakpoint.try4java</Automatic-Module-Name>
-			      </manifestEntries>
-			    </archive>
-			  </configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<configuration>
+					<rulesUri>file://${project.basedir}/maven-version-rules.xml</rulesUri>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${assertj.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -117,7 +288,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.5</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -131,7 +301,6 @@
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.7</version>
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>ossrh</serverId>
@@ -149,39 +318,6 @@
 			</distributionManagement>
 		</profile>
 		<profile>
-			<id>bintray</id>
-			<activation>
-				<property>
-					<name>channel</name>
-					<value>bintray</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-			<distributionManagement>
-				<repository>
-					<id>bintray</id>
-					<url>https://api.bintray.com/maven/${bintrayAccount}/maven/${project.artifactId}/;publish=1</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-		<profile>
 			<id>github</id>
 			<activation>
 				<property>
@@ -194,7 +330,6 @@
 					<plugin>
 						<groupId>de.jutzig</groupId>
 						<artifactId>github-release-plugin</artifactId>
-						<version>1.1.1</version>
 						<configuration>
 							<releaseName>${project.name} ${project.version}</releaseName>
 							<tag>v${project.version}</tag>
@@ -216,7 +351,6 @@
 					<plugin>
 						<groupId>com.nextbreakpoint</groupId>
 						<artifactId>twitter-maven-plugin</artifactId>
-						<version>1.0.1</version>
 						<configuration>
 							<debug>false</debug>
 							<oauthConsumerKey>${consumerKey}</oauthConsumerKey>
