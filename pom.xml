@@ -46,7 +46,6 @@
 		<versions-maven-plugin.version>2.16.2</versions-maven-plugin.version>
 		<nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
 		<github-release-plugin.version>1.6.0</github-release-plugin.version>
-		<twitter-maven-plugin.version>1.0.1</twitter-maven-plugin.version>
 		<maven.version>3.6</maven.version>
 	</properties>
 	<build>
@@ -96,11 +95,6 @@
 					<groupId>org.sonatype.plugins</groupId>
 					<artifactId>nexus-staging-maven-plugin</artifactId>
 					<version>${nexus-staging-maven-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>com.nextbreakpoint</groupId>
-					<artifactId>twitter-maven-plugin</artifactId>
-					<version>${twitter-maven-plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>de.jutzig</groupId>
@@ -333,31 +327,6 @@
 						<configuration>
 							<releaseName>${project.name} ${project.version}</releaseName>
 							<tag>v${project.version}</tag>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>twitter</id>
-			<activation>
-				<property>
-					<name>channel</name>
-					<value>twitter</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.nextbreakpoint</groupId>
-						<artifactId>twitter-maven-plugin</artifactId>
-						<configuration>
-							<debug>false</debug>
-							<oauthConsumerKey>${consumerKey}</oauthConsumerKey>
-							<oauthConsumerSecret>${consumerSecret}</oauthConsumerSecret>
-							<oauthAccessToken>${accessToken}</oauthAccessToken>
-							<oauthAccessTokenSecret>${accessTokenSecret}</oauthAccessTokenSecret>
-							<status>Version ${project.version} of ${project.name} has been released! ${project.url}</status>
 						</configuration>
 					</plugin>
 				</plugins>
