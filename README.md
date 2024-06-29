@@ -1,4 +1,4 @@
-# Common 3.0.1
+# Common 3.0.2
 
 Common is a library which implements useful types for writing code in an elegant and concise style.
 
