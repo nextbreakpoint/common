@@ -1,4 +1,4 @@
-# Common 3.0.1
+# Common 3.0.2
 
 Common is a library which implements useful types for writing code in an elegant and concise style.
 
@@ -19,7 +19,7 @@ This library is distributed under the terms of BSD 3-Clause License.
       this list of conditions and the following disclaimer in the documentation
       and/or other materials provided with the distribution.
 
-    * Neither the name of this library nor the names of its
+    * Neither the name of NextBreakpoint Common library nor the names of its
       contributors may be used to endorse or promote products derived from
       this software without specific prior written permission.
 
@@ -34,16 +34,16 @@ This library is distributed under the terms of BSD 3-Clause License.
     OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-## Binary distribution
+## Get binaries
 
-Common library is available in Maven Central Repository and GitHub.
+Common library is available in Maven Central Repository and [GitHub](https://github.com/nextbreakpoint/common).
 
 If you are using Maven, add the following dependency in your POM:
 
     <dependency>
         <groupId>com.nextbreakpoint</groupId>
         <artifactId>com.nextbreakpoint.common</artifactId>
-        <version>3.0.1</version>
+        <version>3.0.2</version>
     </dependency>
 
 ## Documentation
