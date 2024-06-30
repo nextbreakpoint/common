@@ -331,14 +331,6 @@
 							<failOnExistingRelease>false</failOnExistingRelease>
 							<overwriteArtifact>false</overwriteArtifact>
 							<draft>${github.draft}</draft>
-							<fileSets>
-								<fileSet>
-									<directory>${project.basedir}</directory>
-									<includes>
-										<include>**/${project.artifactId}-${project.version}.jar</include>
-									</includes>
-								</fileSet>
-							</fileSets>
 						</configuration>
 					</plugin>
 				</plugins>
