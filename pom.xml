@@ -45,7 +45,9 @@
 		<maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
 		<versions-maven-plugin.version>2.16.2</versions-maven-plugin.version>
 		<nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+		<github-release-plugin.version>1.6.0</github-release-plugin.version>
 		<maven.version>3.6</maven.version>
+		<github.draft>true</github.draft>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -94,6 +96,11 @@
 					<groupId>org.sonatype.plugins</groupId>
 					<artifactId>nexus-staging-maven-plugin</artifactId>
 					<version>${nexus-staging-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>de.jutzig</groupId>
+					<artifactId>github-release-plugin</artifactId>
+					<version>${github-release-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -299,12 +306,43 @@
 				</plugins>
 			</build>
 			<distributionManagement>
-				<repository>
+				<snapshotRepository>
 					<id>ossrh</id>
-					<name>OSSRH</name>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-				</repository>
+					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				</snapshotRepository>
 			</distributionManagement>
+		</profile>
+		<profile>
+			<id>github</id>
+			<activation>
+				<property>
+					<name>channel</name>
+					<value>github</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>de.jutzig</groupId>
+						<artifactId>github-release-plugin</artifactId>
+						<configuration>
+							<releaseName>${project.name} ${project.version}</releaseName>
+							<tag>v${project.version}</tag>
+							<failOnExistingRelease>false</failOnExistingRelease>
+							<overwriteArtifact>false</overwriteArtifact>
+							<draft>${github.draft}</draft>
+							<fileSets>
+								<fileSet>
+									<directory>${project.basedir}</directory>
+									<includes>
+										<include>**/${project.artifactId}-${project.version}.jar</include>
+									</includes>
+								</fileSet>
+							</fileSets>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>

@@ -24,8 +24,12 @@ dist:
 	mkdir -p dist
 	cp target/com.nextbreakpoint.common-*.jar dist
 
-.PHONY: release
-release:
+.PHONY: github-release
+github-release:
+	mvn -Dchannel=github clean package de.jutzig:github-release-plugin:release -Dgithub.draft=true
+
+.PHONY: maven-release
+maven-release:
 	mvn -Dchannel=ossrh clean deploy
 
 .PHONY: set-version
