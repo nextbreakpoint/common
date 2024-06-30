@@ -1,4 +1,4 @@
-# Common 3.0.2
+# Common 3.0.3
 
 Common is a library which implements useful types for writing code in an elegant and concise style.
 
@@ -43,7 +43,7 @@ If you are using Maven, add the following dependency in your POM:
     <dependency>
         <groupId>com.nextbreakpoint</groupId>
         <artifactId>com.nextbreakpoint.common</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.3</version>
     </dependency>
 
 ## Documentation
